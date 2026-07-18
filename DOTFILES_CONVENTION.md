@@ -7,7 +7,7 @@ Each config is an **independent Stow package** at the top level of this repo.
 ~/dotfiles/
 ├── alacritty/   →  stow alacritty   →  ~/.config/alacritty/alacritty.toml
 ├── atuin/       →  stow atuin       →  ~/.config/atuin/config.toml
-├── bin/         →  stow bin         →  ~/.local/bin/safe-edit
+├── bin/         →  stow bin         →  ~/.local/bin/{safe-edit,pi-agent}
 ├── git/         →  stow git         →  ~/.config/git/config
 ├── htop/        →  stow htop        →  ~/.config/htop/htoprc
 ├── pi/          →  stow pi          →  ~/.pi/agent/extensions/

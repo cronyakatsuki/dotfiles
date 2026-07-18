@@ -1,13 +1,23 @@
 #compdef pi-agent
 
-# Zsh completion for pi-agent — completes agent names from ~/Agents/
+# Zsh completion for pi-agent — completes agent names from ~/agents/ or ~/Agents/
 # with descriptions extracted from AGENTS.md first lines.
 
 _pi-agent() {
   local -a agents
+  local agents_dir
 
-  # Build agent list from directories under ~/Agents/
-  for dir in "$HOME"/Agents/*(N/); do
+  # Check both lowercase and uppercase agent directories
+  if [[ -d "$HOME/agents" ]]; then
+    agents_dir="$HOME/agents"
+  elif [[ -d "$HOME/Agents" ]]; then
+    agents_dir="$HOME/Agents"
+  fi
+
+  [[ -n "$agents_dir" ]] || { _describe 'agent' agents; return }
+
+  # Build agent list
+  for dir in "$agents_dir"/*(N/); do
     local name="${dir:t}"
     local desc=""
 

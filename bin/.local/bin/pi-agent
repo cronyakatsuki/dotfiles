@@ -1,0 +1,150 @@
+#!/bin/bash
+# pi-agent — Launch pi with an agent profile from any directory
+#
+# Usage:
+#   pi-agent <agent-name> [pi-args...]
+#
+# Examples:
+#   pi-agent coder
+#   pi-agent sysadmin "check disk space"
+#   pi-agent ricer -p "sync configs"
+#   pi-agent neovim --model claude-sonnet
+#   pi-agent --dry-run coder
+#   pi-agent --list
+
+set -euo pipefail
+
+# --- Paths ---
+# Check both lowercase and uppercase agent directories
+AGENTS_DIR_LOWER="$HOME/agents"
+AGENTS_DIR_UPPER="$HOME/Agents"
+
+if [ -d "$AGENTS_DIR_LOWER" ]; then
+    AGENTS_DIR="$AGENTS_DIR_LOWER"
+elif [ -d "$AGENTS_DIR_UPPER" ]; then
+    AGENTS_DIR="$AGENTS_DIR_UPPER"
+else
+    echo "Error: No agents directory found at $AGENTS_DIR_LOWER or $AGENTS_DIR_UPPER" >&2
+    exit 1
+fi
+
+# --- Internal option parsing ---
+DRY_RUN=0
+LIST_ONLY=0
+HELP=0
+
+internal_args=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --dry-run) DRY_RUN=1; shift ;;
+        --list|-l) LIST_ONLY=1; shift ;;
+        --help|-h) HELP=1; shift ;;
+        --)        shift; break ;;
+        *)         break ;;
+    esac
+done
+
+# --- Help ---
+if [ "$HELP" -eq 1 ] || { [ $# -lt 1 ] && [ "$LIST_ONLY" -eq 0 ]; }; then
+    echo "Usage: pi-agent <agent-name> [pi-args...]" >&2
+    echo "" >&2
+    echo "Options (before agent name):" >&2
+    echo "  --dry-run              Print pi command without executing" >&2
+    echo "  --list, -l             List available agents" >&2
+    echo "  --help, -h             Show this help" >&2
+    echo "" >&2
+    echo "Available agents:" >&2
+    for d in "$AGENTS_DIR"/*/; do
+        [ -d "$d" ] && echo "  $(basename "$d")" >&2
+    done
+    exit 0
+fi
+
+# --- List agents ---
+if [ "$LIST_ONLY" -eq 1 ]; then
+    echo "Available agents:" >&2
+    for d in "$AGENTS_DIR"/*/; do
+        [ -d "$d" ] && echo "  $(basename "$d")" >&2
+    done
+    exit 0
+fi
+
+# --- Resolve agent ---
+AGENT_NAME="$1"
+shift
+AGENT_DIR="$AGENTS_DIR/$AGENT_NAME"
+
+if [ ! -d "$AGENT_DIR" ]; then
+    echo "Unknown agent: $AGENT_NAME" >&2
+    echo "Available agents:" >&2
+    for d in "$AGENTS_DIR"/*/; do
+        [ -d "$d" ] && echo "  $(basename "$d")" >&2
+    done
+    exit 1
+fi
+
+# --- Assemble pi arguments ---
+args=()
+
+# 1. Load SYSTEM.md (main system prompt) if present
+if [ -f "$AGENT_DIR/SYSTEM.md" ]; then
+    args+=(--system-prompt "$(cat "$AGENT_DIR/SYSTEM.md")")
+fi
+
+# 2. Load AGENTS.md (profile context / append to system prompt) if present
+if [ -f "$AGENT_DIR/AGENTS.md" ]; then
+    args+=(--append-system-prompt "$(cat "$AGENT_DIR/AGENTS.md")")
+fi
+
+# 3. Load APPEND_SYSTEM.md (additional system prompt extension) if present
+if [ -f "$AGENT_DIR/APPEND_SYSTEM.md" ]; then
+    args+=(--append-system-prompt "$(cat "$AGENT_DIR/APPEND_SYSTEM.md")")
+fi
+
+# 4. Load MODEL file (e.g. "claude-sonnet" or "openai/gpt-4o") if present
+if [ -f "$AGENT_DIR/MODEL" ]; then
+    model="$(cat "$AGENT_DIR/MODEL" | head -1 | tr -d '[:space:]')"
+    [ -n "$model" ] && args+=(--model "$model")
+fi
+
+# 5. Load PROVIDER file if present (overrides --provider)
+if [ -f "$AGENT_DIR/PROVIDER" ]; then
+    provider="$(cat "$AGENT_DIR/PROVIDER" | head -1 | tr -d '[:space:]')"
+    [ -n "$provider" ] && args+=(--provider "$provider")
+fi
+
+# 6. Load THINKING file if present (e.g. "high", "low", etc.)
+if [ -f "$AGENT_DIR/THINKING" ]; then
+    thinking="$(cat "$AGENT_DIR/THINKING" | head -1 | tr -d '[:space:]')"
+    [ -n "$thinking" ] && args+=(--thinking "$thinking")
+fi
+
+# 7. Load TOOLS file — comma-separated tool allowlist
+if [ -f "$AGENT_DIR/TOOLS" ]; then
+    tools="$(cat "$AGENT_DIR/TOOLS" | head -1 | tr -d '[:space:]')"
+    [ -n "$tools" ] && args+=(--tools "$tools")
+fi
+
+# 8. Load EXCLUDE_TOOLS file — comma-separated tool denylist
+if [ -f "$AGENT_DIR/EXCLUDE_TOOLS" ]; then
+    xtools="$(cat "$AGENT_DIR/EXCLUDE_TOOLS" | head -1 | tr -d '[:space:]')"
+    [ -n "$xtools" ] && args+=(--exclude-tools "$xtools")
+fi
+
+# 9. Tag the session with the agent name
+args+=(--name "$AGENT_NAME")
+
+# 10. Trust the agent directory (--approve) if it contains project-local files
+if [ -f "$AGENT_DIR/.pi/config" ] || [ -d "$AGENT_DIR/.pi" ]; then
+    args+=(--approve)
+fi
+
+# --- Build final command ---
+cmd=(pi "${args[@]}" "$@")
+
+if [ "$DRY_RUN" -eq 1 ]; then
+    echo "${cmd[@]}"
+    exit 0
+fi
+
+exec "${cmd[@]}"
