@@ -1,0 +1,28 @@
+#compdef pi-agent
+
+# Zsh completion for pi-agent — completes agent names from ~/Agents/
+# with descriptions extracted from AGENTS.md first lines.
+
+_pi-agent() {
+  local -a agents
+
+  # Build agent list from directories under ~/Agents/
+  for dir in "$HOME"/Agents/*(N/); do
+    local name="${dir:t}"
+    local desc=""
+
+    # Try to grab the first meaningful line from AGENTS.md for a description
+    if [[ -f "$dir/AGENTS.md" ]]; then
+      desc=$(head -5 "$dir/AGENTS.md" \
+        | grep -v '^#' \
+        | grep -v '^$' \
+        | sed -n '1{p;q}' 2>/dev/null)
+    fi
+
+    agents+=("$name:${desc:-Agent profile}")
+  done
+
+  _describe 'agent' agents
+}
+
+_pi-agent "$@"

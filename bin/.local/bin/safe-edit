@@ -1,0 +1,497 @@
+#!/usr/bin/env bash
+#
+# safe-edit — safe file editing with automatic backups, rotation, and VCS integration
+#
+# Usage:
+#   safe-edit <file>          # Open in $EDITOR with backup + git integration
+#   safe-edit backup <file>   # Just create a timestamped backup
+#   safe-edit rotate <file>   # Manually rotate backups (keep last 5)
+#   safe-edit restore <file>  # List and restore from backups
+#
+# When a file is changed and it's inside a git/yadm/chezmoi repo,
+# the changes are automatically staged and committed with a descriptive message.
+#
+# Backups are stored alongside the original file in a `.backups/` subdirectory,
+# or in $XDG_DATA_HOME/safe-edit/backups/ for system files.
+#
+# Environment variables:
+#   SAFE_EDIT_BACKUP_DIR  — Override backup directory
+#   SAFE_EDIT_MAX_BACKUPS — Max backups to keep (default: 5)
+#   SAFE_EDIT_NO_GIT      — Set to 1 to disable auto git commit
+#   SAFE_EDIT_NO_BACKUP   — Set to 1 to disable backup creation
+#
+
+set -euo pipefail
+
+MAX_BACKUPS="${SAFE_EDIT_MAX_BACKUPS:-5}"
+BACKUP_BASE="${SAFE_EDIT_BACKUP_DIR:-}"
+
+# ---- Utility Functions ----
+
+realpath_canonical() {
+  if command -v realpath &>/dev/null; then
+    realpath "$1" 2>/dev/null || echo "$1"
+  else
+    readlink -f "$1" 2>/dev/null || echo "$1"
+  fi
+}
+
+backup_dir() {
+  local file="$1"
+  local abs_file
+  abs_file="$(realpath_canonical "$file")"
+
+  if [[ -n "$BACKUP_BASE" ]]; then
+    echo "$BACKUP_BASE"
+    return
+  fi
+
+  local dir
+  dir="$(dirname "$abs_file")"
+
+  # If the file lives inside a git repo under a stow/dotfiles structure,
+  # keep backups outside the repo in XDG data home
+  if [[ "$abs_file" == *"/dotfiles/"* || "$abs_file" == *"/.dotfiles/"* ]]; then
+    local backup_store="${XDG_DATA_HOME:-$HOME/.local/share}/safe-edit/backups"
+    local safe_name
+    safe_name="$(echo "$abs_file" | sed 's|^/||; s|/|_|g')"
+    echo "$backup_store/$safe_name"
+  elif [[ "$dir" == "$HOME" || "$dir" == "$HOME/.config"* || "$dir" == "/etc"* ]]; then
+    local backup_store="${XDG_DATA_HOME:-$HOME/.local/share}/safe-edit/backups"
+    local safe_name
+    safe_name="$(echo "$abs_file" | sed 's|^/||; s|/|_|g')"
+    echo "$backup_store/$safe_name"
+  else
+    echo "$dir/.backups"
+  fi
+}
+
+create_backup() {
+  local file="$1"
+
+  if [[ "${SAFE_EDIT_NO_BACKUP:-}" == "1" ]]; then
+    return 0
+  fi
+
+  if [[ ! -f "$file" ]]; then
+    return 0
+  fi
+
+  local abs_file
+  abs_file="$(realpath_canonical "$file")"
+  local bdir
+  bdir="$(backup_dir "$file")"
+
+  mkdir -p "$bdir"
+
+  local timestamp
+  timestamp="$(date +%s%N 2>/dev/null || date +%s)"
+  local base
+  base="$(basename "$abs_file")"
+  local backup_file="$bdir/${base}.${timestamp}"
+
+  cp "$abs_file" "$backup_file"
+  chmod 600 "$backup_file" 2>/dev/null || true
+
+  echo "$backup_file"
+}
+
+rotate_backups() {
+  local file="$1"
+  local bdir
+  bdir="$(backup_dir "$file")"
+
+  if [[ ! -d "$bdir" ]]; then
+    return 0
+  fi
+
+  local base
+  base="$(basename "$(realpath_canonical "$file")")"
+
+  local backups=()
+  while IFS= read -r -d '' bak; do
+    backups+=("$bak")
+  done < <(find "$bdir" -maxdepth 1 -name "${base}.*" -type f -printf '%T@\t%p\0' 2>/dev/null | sort -z -n | cut -z -f2-)
+
+  local count="${#backups[@]}"
+
+  if [[ "$count" -le "$MAX_BACKUPS" ]]; then
+    return 0
+  fi
+
+  local to_delete=$((count - MAX_BACKUPS))
+  for ((i=0; i<to_delete; i++)); do
+    rm -f "${backups[$i]}"
+    echo "  Removed old backup: ${backups[$i]##*/}" >&2
+  done
+}
+
+# ---- Git / Dotfile Detection ----
+
+is_in_git_repo() {
+  local file="$1"
+  local dir
+  dir="$(dirname "$(realpath_canonical "$file")")"
+
+  local check="$dir"
+  while [[ "$check" != "/" ]]; do
+    if [[ -d "$check/.git" ]]; then
+      echo "$check"
+      return 0
+    fi
+    check="$(dirname "$check")"
+  done
+  return 1
+}
+
+is_managed_by_yadm() {
+  command -v yadm &>/dev/null || return 1
+  yadm status "$1" &>/dev/null
+}
+
+is_managed_by_chezmoi() {
+  command -v chezmoi &>/dev/null || return 1
+  chezmoi managed "$1" &>/dev/null
+}
+
+is_managed_by_stow() {
+  # Check if file is a symlink pointing into a Stow-managed repo
+  [[ -L "$1" ]] || return 1
+  local target
+  target="$(readlink "$1" 2>/dev/null)" || return 1
+  # Stow convention: symlink points to something like ../dotfiles/<pkg>/file
+  if [[ "$target" == *"/dotfiles/"* ]]; then
+    return 0
+  fi
+  # Also check if resolved path lives under a stow directory
+  local real_path
+  real_path="$(realpath_canonical "$1" 2>/dev/null)"
+  if [[ -n "$real_path" ]]; then
+    local stow_root
+    stow_root="$(dirname "$real_path" 2>/dev/null)"
+    while [[ "$stow_root" != "/" ]]; do
+      if [[ -f "$stow_root/.stow" ]]; then
+        return 0
+      fi
+      stow_root="$(dirname "$stow_root")"
+    done
+  fi
+  return 1
+}
+
+detect_vcs() {
+  local file="$1"
+  local vcs_label=""
+
+  local git_root
+  git_root="$(is_in_git_repo "$file")" && {
+    vcs_label="git:$git_root"
+
+    # Check if it's also Stow-managed
+    if is_managed_by_stow "$file"; then
+      echo "stow+git:$git_root"
+    else
+      echo "$vcs_label"
+    fi
+    return 0
+  }
+
+  is_managed_by_yadm "$file" && {
+    echo "yadm"
+    return 0
+  }
+
+  is_managed_by_chezmoi "$file" && {
+    echo "chezmoi"
+    return 0
+  }
+
+  return 1
+}
+
+# ---- Git Commit ----
+
+generate_commit_message() {
+  local file="$1"
+  local base
+  base="$(basename "$file")"
+
+  local lines_added deleted
+  lines_added="$(git diff --numstat "$file" 2>/dev/null | awk '{print $1}')"
+  deleted="$(git diff --numstat "$file" 2>/dev/null | awk '{print $2}')"
+
+  if [[ -n "$lines_added" && -n "$deleted" ]]; then
+    if [[ "$lines_added" -gt 0 && "$deleted" -gt 0 ]]; then
+      echo "update: $base (+$lines_added, -$deleted lines)"
+    elif [[ "$lines_added" -gt 0 ]]; then
+      echo "update: $base (+$lines_added lines)"
+    elif [[ "$deleted" -gt 0 ]]; then
+      echo "update: $base (-$deleted lines)"
+    else
+      echo "update: $base"
+    fi
+  else
+    if git log --oneline "$file" 2>/dev/null | head -1 | grep -q .; then
+      echo "update: $base"
+    else
+      echo "add: $base"
+    fi
+  fi
+}
+
+git_commit_if_needed() {
+  local file="$1"
+  local vcs_info
+  vcs_info="$(detect_vcs "$file")" || return 0
+
+  if [[ "${SAFE_EDIT_NO_GIT:-}" == "1" ]]; then
+    return 0
+  fi
+
+  local vcs_type="${vcs_info%%:*}"
+  local vcs_root="${vcs_info#*:}"
+
+  case "$vcs_type" in
+    git|stow+git)
+      if [[ "$vcs_root" == "$vcs_info" ]]; then
+        return 0
+      fi
+
+      # Resolve the real path through symlinks (for Stow-managed files)
+      local real_file
+      real_file="$(realpath_canonical "$file")"
+
+      cd "$vcs_root"
+      if git diff --quiet "$real_file" && git diff --cached --quiet "$real_file"; then
+        return 0
+      fi
+
+      local msg
+      msg="$(generate_commit_message "$real_file")"
+
+      git add "$real_file" 2>/dev/null || true
+      # Only commit if this specific file was staged (not other pre-staged files)
+      if git diff --cached --quiet "$real_file"; then
+        return 0
+      fi
+
+      git commit -m "$msg" --no-gpg-sign -- "$real_file" 2>/dev/null || git commit -m "$msg" -- "$real_file" 2>/dev/null || true
+      echo "  Git committed: $msg" >&2
+      ;;
+    yadm)
+      yadm add "$file" 2>/dev/null || true
+      if yadm diff --cached --quiet 2>/dev/null; then
+        return 0
+      fi
+      local msg="update: $(basename "$file")"
+      yadm commit -m "$msg" 2>/dev/null || true
+      echo "  yadm committed: $msg" >&2
+      ;;
+    chezmoi)
+      local source_file
+      source_file="$(chezmoi source-path "$file" 2>/dev/null)" || true
+      if [[ -n "$source_file" ]]; then
+        cd "$(dirname "$source_file")"
+        git add "$source_file" 2>/dev/null || true
+        if ! git diff --cached --quiet 2>/dev/null; then
+          git commit -m "update: $(basename "$file")" --no-gpg-sign 2>/dev/null || true
+          echo "  chezmoi git committed: $(basename "$file")" >&2
+        fi
+      fi
+      ;;
+  esac
+}
+
+# ---- Safe Edit ----
+
+safe_edit_file() {
+  local file="$1"
+
+  if [[ ! -f "$file" ]] && [[ ! -w "$(dirname "$file" 2>/dev/null || echo '.')" ]]; then
+    echo "Error: Cannot write to $file or its directory" >&2
+    return 1
+  fi
+
+  local vcs_info=""
+  vcs_info="$(detect_vcs "$file")" || true
+
+  if [[ -n "$vcs_info" ]]; then
+    echo "  Managed by: $vcs_info" >&2
+  fi
+
+  local bak_file=""
+  if [[ -f "$file" ]]; then
+    bak_file="$(create_backup "$file")"
+    if [[ -n "$bak_file" ]]; then
+      echo "  Backup: ${bak_file##*/}" >&2
+    fi
+    rotate_backups "$file"
+  fi
+
+  local editor="${EDITOR:-${VISUAL:-nano}}"
+  "$editor" "$file"
+
+  if [[ -f "$file" ]]; then
+    git_commit_if_needed "$file"
+    rotate_backups "$file"
+  fi
+}
+
+# ---- Backup / Restore ----
+
+list_backups() {
+  local file="$1"
+  local bdir
+  bdir="$(backup_dir "$file")"
+
+  if [[ ! -d "$bdir" ]]; then
+    echo "No backups found for $file" >&2
+    return 1
+  fi
+
+  local base
+  base="$(basename "$(realpath_canonical "$file")")"
+
+  echo "Backups for $file:" >&2
+  local idx=0
+  while IFS= read -r -d '' bak; do
+    idx=$((idx + 1))
+    local ts
+    ts="$(stat -c '%Y' "$bak" 2>/dev/null || echo "${bak##*.}")"
+    local date_str
+    if command -v date &>/dev/null; then
+      date_str="$(date -d "@$ts" '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo "$ts")"
+    else
+      date_str="$ts"
+    fi
+    local size
+    size="$(du -h "$bak" 2>/dev/null | cut -f1)"
+    echo "  [$idx] $date_str  ($size)  ${bak##*/}" >&2
+  done < <(find "$bdir" -maxdepth 1 -name "${base}.*" -type f -printf '%T@\t%p\0' 2>/dev/null | sort -z -n | cut -z -f2-)
+
+  echo "$idx"
+}
+
+restore_backup() {
+  local file="$1"
+  local selection="${2:-}"
+
+  local bdir
+  bdir="$(backup_dir "$file")"
+
+  if [[ ! -d "$bdir" ]]; then
+    echo "No backups found for $file" >&2
+    return 1
+  fi
+
+  local base
+  base="$(basename "$(realpath_canonical "$file")")"
+
+  local backups=()
+  while IFS= read -r -d '' bak; do
+    backups+=("$bak")
+  done < <(find "$bdir" -maxdepth 1 -name "${base}.*" -type f -printf '%T@\t%p\0' 2>/dev/null | sort -z -n | cut -z -f2-)
+
+  if [[ ${#backups[@]} -eq 0 ]]; then
+    echo "No backups found for $file" >&2
+    return 1
+  fi
+
+  if [[ -z "$selection" ]]; then
+    list_backups "$file"
+    echo "" >&2
+    read -r -p "Select backup to restore [1-${#backups[@]}]: " selection
+  fi
+
+  if [[ ! "$selection" =~ ^[0-9]+$ ]] || [[ "$selection" -lt 1 ]] || [[ "$selection" -gt "${#backups[@]}" ]]; then
+    echo "Invalid selection" >&2
+    return 1
+  fi
+
+  local selected="${backups[$((selection - 1))]}"
+
+  if [[ -f "$file" ]]; then
+    create_backup "$file" >/dev/null
+  fi
+
+  cp "$selected" "$file"
+  echo "Restored: ${selected##*/} -> $file" >&2
+  git_commit_if_needed "$file"
+}
+
+# ---- Main ----
+
+main() {
+  local cmd="${1:-}"
+
+  case "${cmd}" in
+    backup)
+      shift
+      if [[ $# -eq 0 ]]; then echo "Usage: safe-edit backup <file> [files...]" >&2; exit 1; fi
+      local ret=0
+      for f in "$@"; do
+        local bak
+        bak="$(create_backup "$f")" || { ret=1; continue; }
+        echo "$bak"
+        rotate_backups "$f"
+      done
+      exit $ret
+      ;;
+    rotate)
+      shift
+      if [[ $# -eq 0 ]]; then echo "Usage: safe-edit rotate <file> [files...]" >&2; exit 1; fi
+      for f in "$@"; do rotate_backups "$f"; done
+      exit 0
+      ;;
+    list|ls)
+      shift
+      if [[ $# -eq 0 ]]; then echo "Usage: safe-edit list <file>" >&2; exit 1; fi
+      list_backups "$1"
+      exit 0
+      ;;
+    restore)
+      shift
+      if [[ $# -lt 1 ]]; then echo "Usage: safe-edit restore <file> [backup-number]" >&2; exit 1; fi
+      restore_backup "$1" "${2:-}"
+      exit $?
+      ;;
+    status)
+      shift
+      if [[ $# -eq 0 ]]; then echo "Usage: safe-edit status <file>" >&2; exit 1; fi
+      local vcs; vcs="$(detect_vcs "$1")" || vcs="none"
+      echo "File: $1"
+      echo "VCS:  $vcs"
+      echo "Backup dir: $(backup_dir "$1")"
+      local count; count="$(list_backups "$1" | tail -1 2>/dev/null || echo 0)"
+      echo "Backups: $count"
+      exit 0
+      ;;
+    commit)
+      shift
+      if [[ $# -eq 0 ]]; then echo "Usage: safe-edit commit <file> [file...]" >&2; exit 1; fi
+      for f in "$@"; do git_commit_if_needed "$f"; done
+      exit 0
+      ;;
+    "")
+      echo "Usage: safe-edit <file>               Edit file with backups + VCS integration"
+      echo "       safe-edit backup <file>        Create a timestamped backup"
+      echo "       safe-edit rotate <file>        Remove old backups (keep last $MAX_BACKUPS)"
+      echo "       safe-edit list <file>          List backups"
+      echo "       safe-edit restore <file> [n]   Restore from backup"
+      echo "       safe-edit status <file>        Show file status"
+      echo "       safe-edit commit <file>        Git-commit changes"
+      exit 0
+      ;;
+    -*)
+      echo "Error: Unknown option $1" >&2; exit 1
+      ;;
+    *)
+      safe_edit_file "$1"
+      exit $?
+      ;;
+  esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi

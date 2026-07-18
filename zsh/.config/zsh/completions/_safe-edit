@@ -1,0 +1,35 @@
+#compdef safe-edit se
+
+_safe_edit_commands() {
+  local -a commands
+  commands=(
+    'backup:Create a timestamped backup of file(s)'
+    'rotate:Remove old backups, keeping only the last 5'
+    'list:List available backups for a file'
+    'ls:Alias for list'
+    'restore:Restore a file from a backup'
+    'status:Show file VCS and backup status'
+    'commit:Git-commit changes for file(s)'
+  )
+  _describe 'command' commands
+}
+
+_safe_edit() {
+  local curcontext="$curcontext" state line
+  typeset -A opt_args
+
+  _arguments -C \
+    '1: :->command' \
+    '*: :->args'
+
+  case "$state" in
+    command)
+      _safe_edit_commands
+      ;;
+    args)
+      _files
+      ;;
+  esac
+}
+
+_safe_edit "$@"
