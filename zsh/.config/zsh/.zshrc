@@ -65,12 +65,17 @@ export PI_CODING_AGENT_DIR="$HOME/.local/share/pi/agent"
 export NPM_CONFIG_CACHE="$HOME/.cache/npm"
 export CUDA_CACHE_PATH="$HOME/.cache/NVIDIA/ComputeCache"
 export GOMODCACHE="$HOME/.cache/go/mod"
+export GOPATH="$HOME/.local/share/go"
 export GNUPGHOME="$HOME/.local/share/gnupg"
+export RUSTUP_HOME="$HOME/.local/share/rustup"
+export CARGO_HOME="$HOME/.local/share/cargo"
+export ATUIN_DATA_DIR="$HOME/.local/share/atuin"
 
 # Sudo askpass helper — graphical password prompt
 [ -z "$SUDO_ASKPASS" ] && export SUDO_ASKPASS="/usr/bin/ksshaskpass"
 export PATH="$HOME/.local/share/npm-global/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$CARGO_HOME/bin:$PATH"
 
 # ---- Safe Edit (backup + git integration) ----
 # Provides auto-backup, rotation (max 5), and git commit for config changes.
