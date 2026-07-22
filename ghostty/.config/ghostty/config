@@ -1,0 +1,74 @@
+# ════════════════════════════════════════════════════════════════════
+#  Ghostty Config — Monaspace Frozen + NF Symbols + tmux + Catppuccin
+#  Reload: Ctrl+Shift+, (or restart ghostty)
+# ════════════════════════════════════════════════════════════════════
+
+# ── Font: Monaspace Frozen (ligatures + texture healing baked in) ───
+font-family = "Monaspace Neon Frozen"
+
+# ── Fallback: Nerd Font icons (symbols only) ────────────────────────
+font-family = "Symbols Nerd Font Mono"
+
+# ── Font size ───────────────────────────────────────────────────────
+font-size = 15
+
+# ── Auto-launch tmux ────────────────────────────────────────────────
+# command = tmux new-session -A -s main
+shell-integration = detect
+
+# ── Hide tab bar (tmux handles tabs/windows) ────────────────────────
+window-show-tab-bar = never
+
+# ── Remove titlebar & borders for clean minimal look ────────────────
+window-decoration = none
+
+# ── Don't confirm when closing (tmux handles persistence) ───────────
+confirm-close-surface = false
+
+# --- Unbind Splits ---
+keybind = ctrl+shift+)=unbind
+keybind = ctrl+shift+d=unbind
+keybind = ctrl+shift+alt+left=unbind
+keybind = ctrl+shift+alt+right=unbind
+keybind = ctrl+shift+alt+up=unbind
+keybind = ctrl+shift+alt+down=unbind
+keybind = ctrl+shift+alt+=unbind
+keybind = ctrl+shift+alt+-=unbind
+keybind = ctrl+shift+z=unbind
+
+# --- Unbind Tabs ---
+keybind = ctrl+shift+t=unbind
+keybind = ctrl+shift+w=unbind
+keybind = ctrl+tab=unbind
+keybind = ctrl+shift+tab=unbind
+keybind = ctrl+shift+1=unbind
+keybind = ctrl+shift+2=unbind
+keybind = ctrl+shift+3=unbind
+keybind = ctrl+shift+4=unbind
+keybind = ctrl+shift+5=unbind
+keybind = ctrl+shift+6=unbind
+keybind = ctrl+shift+7=unbind
+keybind = ctrl+shift+8=unbind
+keybind = ctrl+shift+9=unbind
+
+# --- Unbind Windows ---
+keybind = ctrl+shift+n=unbind
+keybind = ctrl+shift+q=unbind
+
+# ── Cursor ──────────────────────────────────────────────────────────
+cursor-style = block
+cursor-style-blink = false
+
+# ── Scrollback (small — tmux has its own) ───────────────────────────
+scrollback-limit = 1000
+
+# ── Clipboard ───────────────────────────────────────────────────────
+clipboard-read = allow
+clipboard-trim-trailing-spaces = true
+copy-on-select = clipboard
+
+# ── Theme: Catppuccin Mocha (built-in, no download needed) ──────────
+theme = Catppuccin Mocha
+
+# ── Misc ────────────────────────────────────────────────────────────
+mouse-hide-while-typing = true
