@@ -1,0 +1,65 @@
+[[mgr.prepend_keymap]]
+on   = "l"
+run  = "plugin smart-enter"
+desc = "Enter the child directory, or open the file"
+
+# Vim-like jump to char
+[[mgr.prepend_keymap]]
+on   = "f"
+run  = "plugin jump-to-char"
+desc = "Jump to the next file whose name starts with the typed character"
+
+# Smart filter
+[[mgr.prepend_keymap]]
+on   = "F"
+run  = "plugin smart-filter"
+desc = "Smart filter with continuous filtering"
+
+# Smart paste (replaces default p)
+[[mgr.prepend_keymap]]
+on   = "p"
+run  = "plugin smart-paste"
+desc = "Paste into the hovered directory or CWD"
+
+# Drop to shell
+[[mgr.prepend_keymap]]
+on   = "!"
+for  = "unix"
+run  = 'shell "$SHELL" --block'
+desc = "Open $SHELL here"
+
+# cd to git root
+[[mgr.prepend_keymap]]
+on   = [ "g", "r" ]
+run  = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"'
+desc = "Cd to git root"
+
+# Override default Space (toggle selection) to make it work as a leader key
+[[mgr.prepend_keymap]]
+on   = "<Space>"
+run  = "noop"
+desc = "Override default Space for leader key chords"
+
+# Then Space p to toggle preview pane
+[[mgr.prepend_keymap]]
+on   = [ "<Space>", "p" ]
+run  = "plugin toggle-pane min-preview"
+desc = "Show or hide the preview pane"
+
+# Keep selection available on v key (vim-like)
+[[mgr.prepend_keymap]]
+on   = "v"
+run  = [ "toggle", "arrow 1" ]
+desc = "Toggle selection on hovered file"
+
+# chmod
+[[mgr.prepend_keymap]]
+on   = [ "c", "m" ]
+run  = "plugin chmod"
+desc = "Chmod on selected files"
+
+# ouch compression
+[[mgr.prepend_keymap]]
+on   = "C"
+run  = "plugin ouch"
+desc = "Compress with ouch"
