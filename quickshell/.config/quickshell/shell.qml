@@ -114,6 +114,7 @@ ShellRoot {
         bodySupported: true
         actionsSupported: false
         imageSupported: false
+        onNotification: n => console.log("DBG notif:", n.appName, "| tracked:", n.tracked, "| t/o:", n.expireTimeout, "| urgency:", n.urgency, "|", n.summary)
     }
 
     PanelWindow {
@@ -127,6 +128,8 @@ ShellRoot {
             right: 8
         }
         implicitWidth: 360
+        onImplicitWidthChanged: console.log("DBG win w=", implicitWidth)
+        onImplicitHeightChanged: console.log("DBG win h=", implicitHeight)
         exclusiveZone: 0           // float over content, don't reserve space
         aboveWindows: true
         focusable: false
