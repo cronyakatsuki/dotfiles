@@ -171,16 +171,17 @@ ShellRoot {
                 spacing: 4
 
                 readonly property var node: Pipewire.defaultAudioSink
+                readonly property string volumeIcon: {
+                    const v = node?.audio?.volume ?? 0
+                    if (node?.audio?.muted || v <= 0) return "audio-volume-muted-symbolic"
+                    if (v < 0.34) return "audio-volume-low-symbolic"
+                    if (v < 0.67) return "audio-volume-medium-symbolic"
+                    return "audio-volume-high-symbolic"
+                }
 
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
-                    source: "image://icon/" + {
-                        const v = volumeWidget.node?.audio?.volume ?? 0
-                        if (volumeWidget.node?.audio?.muted || v <= 0) return "audio-volume-muted-symbolic"
-                        if (v < 0.34) return "audio-volume-low-symbolic"
-                        if (v < 0.67) return "audio-volume-medium-symbolic"
-                        return "audio-volume-high-symbolic"
-                    }
+                    source: "image://icon/" + volumeWidget.volumeIcon
                     sourceSize.width: 16
                     sourceSize.height: 16
                 }
