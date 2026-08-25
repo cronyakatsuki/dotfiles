@@ -208,8 +208,8 @@ ShellRoot {
                     onWheel: wheel => {
                         const n = volumeWidget.node
                         if (!n) return
-                        const delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
-                        n.audio.volume = Math.max(0, Math.min(1.5, n.audio.volume + delta))
+                        const delta = wheel.angleDelta.y > 0 ? 0.02 : -0.02
+                        n.audio.volume = Math.max(0, Math.min(1.0, n.audio.volume + delta))
                     }
                 }
             }
