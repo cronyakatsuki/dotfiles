@@ -8,7 +8,7 @@ export FZF_DEFAULT_OPTS=" \
   --color=selected-bg:#45475A \
   --color=border:#6C7086,label:#CDD6F4 \
   --layout=reverse --height=40% --border --info=inline \
-  --preview 'bat --color=always --line-range=:200 {}'"
+  --preview 'bat -f --line-range=:200 {}'"
 
 # Ctrl-T: files only, dotfiles included, no ./ prefix (global fd ignore applies)
 export FZF_CTRL_T_COMMAND='fd --type f --hidden --strip-cwd-prefix'
