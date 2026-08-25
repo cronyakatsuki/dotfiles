@@ -19,34 +19,7 @@ import Quickshell.Services.Pipewire       // volume widget: Pipewire, PwNode, Pw
 import Quickshell.Services.Mpris          // media widget: Mpris, MprisPlayer
 import Quickshell.Io                       // Process + StdioCollector (system monitor)
 import Quickshell.Widgets                 // IconImage (icon-style images)
-
-// Module wrapper: full bar height with a 2px accent underline at the bottom.
-// Children go into an inner Row (centered); hides together with its content.
-component ModuleBar: Item {
-    id: moduleRoot
-    property color accent: "#B4BEFE"
-    default property alias content: row.data
-
-    width: row.implicitWidth + 8
-    height: 44                      // bar height
-    visible: row.implicitWidth > 0  // hide with the content
-
-    Row {
-        id: row
-        anchors.centerIn: parent
-        spacing: 0
-    }
-
-    Rectangle {
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-        height: 2
-        color: accent
-    }
-}
+import qs                                  // ModuleBar (ModuleBar.qml in this dir)
 
 ShellRoot {
     PanelWindow {
