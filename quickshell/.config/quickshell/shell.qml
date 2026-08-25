@@ -14,9 +14,12 @@ import Quickshell  // ShellRoot, PanelWindow, SystemClock, Quickshell.screens
 import QtQuick     // Row, Text, Rectangle, Repeater, Timer...
 import Niri        // the qml-niri plugin: workspaces, windows, overview, etc.
 import Quickshell.Services.Notifications  // notification daemon + Notification type
+import Quickshell.Services.SystemTray     // SystemTray singleton + SystemTrayItem
+import Quickshell.Widgets                 // IconImage (icon-style images)
 
 ShellRoot {
     PanelWindow {
+        id: bar
         anchors {
             top: true
             left: true
@@ -88,21 +91,82 @@ ShellRoot {
             }
         }
 
-        // ---------- right: clock ----------
-        Text {
+        // ---------- right: clock + system tray ----------
+        Row {
+            id: rightSide
+            spacing: 10
             anchors {
                 right: parent.right
-                rightMargin: 12
+                rightMargin: 8
                 verticalCenter: parent.verticalCenter
             }
-            text: Qt.formatTime(clock.date, "HH:mm")
-            color: "#CDD6F4"
-            font.family: "Inter"
-            font.pointSize: 13
 
-            SystemClock {
-                id: clock
-                precision: SystemClock.Minutes // no seconds -> less work
+            // clock
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: Qt.formatTime(clock.date, "HH:mm")
+                color: "#CDD6F4"
+                font.family: "Inter"
+                font.pointSize: 13
+
+                SystemClock {
+                    id: clock
+                    precision: SystemClock.Minutes // no seconds -> less work
+                }
+            }
+
+            // system tray — pinned to the far right, darker chip so its
+            // start/end is obvious.
+            Rectangle {
+                id: trayBox
+                radius: 6
+                height: 30
+                color: "#181825"             // catppuccin mocha mantle (darker than bar base)
+                border.color: "#313244"      // surface0 edge
+                border.width: 1
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: Math.max(trayRow.implicitWidth + 8, 26)
+
+                Row {
+                    id: trayRow
+                    anchors.centerIn: parent
+                    spacing: 2
+
+                    Repeater {
+                        model: SystemTray.items
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            readonly property var item: modelData
+
+                            width: 24
+                            height: 24
+                            radius: 5
+                            color: ma.containsMouse ? "#45475A" : "transparent"
+
+                            IconImage {
+                                anchors.centerIn: parent
+                                implicitSize: 17
+                                source: item.icon
+                            }
+
+                            MouseArea {
+                                id: ma
+                                anchors.fill: parent
+                                onClicked: {
+                                    if (item.hasMenu) {
+                                        // show the item's menu just below the icon
+                                        var pos = parent.mapToItem(bar.contentItem, 0, 0)
+                                        item.display(bar, pos.x, pos.y + parent.height)
+                                    } else {
+                                        item.activate()
+                                    }
+                                }
+                                onPressAndHold: item.secondaryActivate()
+                            }
+                        }
+                    }
+                }
             }
         }
     }
