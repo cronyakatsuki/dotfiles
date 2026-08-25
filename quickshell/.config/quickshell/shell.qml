@@ -17,6 +17,7 @@ import Quickshell.Services.Notifications  // notification daemon + Notification 
 import Quickshell.Services.SystemTray     // SystemTray singleton + SystemTrayItem
 import Quickshell.Services.Pipewire       // volume widget: Pipewire, PwNode, PwObjectTracker
 import Quickshell.Services.Mpris          // media widget: Mpris, MprisPlayer
+import Quickshell.Io                       // Process (spawn notify-send for sink changes)
 import Quickshell.Widgets                 // IconImage (icon-style images)
 
 ShellRoot {
@@ -201,10 +202,34 @@ ShellRoot {
                     }
                 }
 
+                // one-shot process for the "sink switched" notification
+                Process {
+                    id: sinkNotify
+                    running: false
+                }
+
+                // cycle the default audio sink on right-click (Easy Effects excluded)
+                function cycleSink() {
+                    const sinks = Pipewire.nodes.values.filter(n =>
+                        n && n.isSink && !String(n.description ?? "").toLowerCase().includes("easy effects"))
+                    if (sinks.length < 2) return
+                    const cur = Pipewire.defaultAudioSink
+                    const next = sinks[(sinks.indexOf(cur) + 1) % sinks.length]
+                    if (!next) return
+                    Pipewire.preferredDefaultAudioSink = next
+                    const name = next.description || next.name || "unknown sink"
+                    sinkNotify.command = ["notify-send", "--app-name=Sink switcher",
+                        "Audio output switched", name]
+                    sinkNotify.running = true
+                }
+
                 MouseArea {
                     anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
-                    onClicked: volumeWidget.node.audio.muted = !volumeWidget.node.audio.muted
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    onClicked: mouse => {
+                        if (mouse.button === Qt.RightButton) volumeWidget.cycleSink()
+                        else volumeWidget.node.audio.muted = !volumeWidget.node.audio.muted
+                    }
                     onWheel: wheel => {
                         const n = volumeWidget.node
                         if (!n) return
