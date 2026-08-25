@@ -17,6 +17,7 @@ import Quickshell.Services.Notifications  // notification daemon + Notification 
 import Quickshell.Services.SystemTray     // SystemTray singleton + SystemTrayItem
 import Quickshell.Services.Pipewire       // volume widget: Pipewire, PwNode, PwObjectTracker
 import Quickshell.Services.Mpris          // media widget: Mpris, MprisPlayer
+import Quickshell.Io                       // Process + StdioCollector (system monitor)
 import Quickshell.Widgets                 // IconImage (icon-style images)
 
 ShellRoot {
