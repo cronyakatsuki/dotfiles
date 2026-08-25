@@ -19,7 +19,6 @@ import Quickshell.Services.Pipewire       // volume widget: Pipewire, PwNode, Pw
 import Quickshell.Services.Mpris          // media widget: Mpris, MprisPlayer
 import Quickshell.Io                       // Process + StdioCollector (system monitor)
 import Quickshell.Widgets                 // IconImage (icon-style images)
-import qs                                  // ModuleBar (ModuleBar.qml in this dir)
 
 ShellRoot {
     PanelWindow {
@@ -54,9 +53,15 @@ ShellRoot {
             }
 
             // workspaces switcher
-            ModuleBar {
-                accent: "#B4BEFE"                     // lavender
-                Repeater {
+            Item {
+                width: wsRow.implicitWidth + 8
+                height: 44
+                visible: wsRow.implicitWidth > 0
+                Row {
+                    id: wsRow
+                    anchors.centerIn: parent
+                    spacing: 0
+                    Repeater {
                     model: niri.workspaces
                     delegate: Rectangle {
                         width: 32
@@ -81,15 +86,27 @@ ShellRoot {
                         }
                     }
                 }
+                }
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: 2
+                    color: "#B4BEFE"
+                }
             }
 
             // separator
             Rectangle { width: 1; height: 20; color: "#45475A" }
 
             // focused window title
-            ModuleBar {
-                accent: "#89B4FA"                     // blue
-                Text {
+            Item {
+                width: titleRow.implicitWidth + 8
+                height: 44
+                visible: titleRow.implicitWidth > 0
+                Row {
+                    id: titleRow
+                    anchors.centerIn: parent
+                    spacing: 0
+                    Text {
                     width: 240
                     text: niri.focusedWindow?.title ?? ""
                     color: "#CDD6F4"
@@ -97,6 +114,12 @@ ShellRoot {
                     font.pointSize: 13
                     elide: Text.ElideRight
                     verticalAlignment: Text.AlignVCenter
+                }
+                }
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: 2
+                    color: "#89B4FA"
                 }
             }
         }
@@ -112,11 +135,13 @@ ShellRoot {
             }
 
             // system monitor — CPU / RAM / GPU temp, polled every 2s
-            ModuleBar {
-                accent: "#94E2D5"                     // teal
+            Item {
+                width: monitorWidget.implicitWidth + 8
+                height: 44
+                visible: monitorWidget.implicitWidth > 0
                 Row {
                     id: monitorWidget
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.centerIn: parent
                     spacing: 4
                     visible: monitorText.text !== ""
 
@@ -171,15 +196,22 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                     }
                 }
                 }
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: 2
+                    color: "#94E2D5"
+                }
             }
 
             // media player — shows the current MPRIS track (spotifyd);
             // prev / play-pause / next buttons, hidden when nothing plays.
-            ModuleBar {
-                accent: "#F5C2E7"                     // pink
+            Item {
+                width: mediaWidget.implicitWidth + 8
+                height: 44
+                visible: mediaWidget.implicitWidth > 0
                 Row {
                     id: mediaWidget
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.centerIn: parent
                     spacing: 5
                     visible: player != null && player.trackTitle !== ""
 
@@ -231,11 +263,18 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                         : ""
                 }
                 }
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: 2
+                    color: "#F5C2E7"
+                }
             }
 
             // volume — icon + %, scroll = level, click = mute
-            ModuleBar {
-                accent: "#A6E3A1"                     // green
+            Item {
+                width: volumeWidget.implicitWidth + 8
+                height: 44
+                visible: volumeWidget.implicitWidth > 0
                 PwObjectTracker {
                     objects: [Pipewire.defaultAudioSink]
                 }
@@ -304,13 +343,23 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                         n.audio.volume = Math.max(0, Math.min(1.0, n.audio.volume + delta))
                     }
                 }
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: 2
+                    color: "#A6E3A1"
                 }
             }
 
             // clock
-            ModuleBar {
-                accent: "#F9E2AF"                     // yellow
-                Text {
+            Item {
+                width: clockRow.implicitWidth + 8
+                height: 44
+                visible: clockRow.implicitWidth > 0
+                Row {
+                    id: clockRow
+                    anchors.centerIn: parent
+                    spacing: 0
+                    Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: Qt.formatTime(clock.date, "HH:mm")
                 color: "#CDD6F4"
@@ -322,12 +371,20 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                     precision: SystemClock.Minutes // no seconds -> less work
                 }
                 }
+                }
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: 2
+                    color: "#F9E2AF"
+                }
             }
 
             // system tray — pinned to the far right, darker chip so its
             // start/end is obvious.
-            ModuleBar {
-                accent: "#FAB387"                     // peach
+            Item {
+                width: trayRow.implicitWidth + 8
+                height: 44
+                visible: trayRepeater.count > 0
                 Rectangle {
                 id: trayBox
                 visible: trayRepeater.count > 0   // hide when nothing is in the tray
@@ -375,13 +432,19 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                                         item.activate()
                                     }
                                 }
-                                onPressAndHold: item.secondaryActivate()
-                            }
+                                                                onPressAndHold: item.secondaryActivate()
+                                                        }
+                                                }
+                                        }
+                                }
                         }
-                    }
-                }
             }
             }
+                        Rectangle {
+                                anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                                height: 2
+                                color: "#FAB387"
+                        }
         }
     }
 
