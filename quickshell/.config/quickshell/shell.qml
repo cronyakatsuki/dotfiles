@@ -336,13 +336,15 @@ ShellRoot {
         anchors {
             top: true
             right: true
+            bottom: true      // full-height window: size never changes -> no resize bug
         }
         margins {
             top: 48       // just below the 44px bar
             right: 8
         }
         implicitWidth: 360
-        visible: notifServer.trackedNotifications.values.length > 0   // remap fresh per popup group
+        visible: notifServer.trackedNotifications.values.length > 0
+        mask: Region { item: popupList.contentItem }   // reveal only the cards
         exclusiveZone: 0           // float over content, don't reserve space
         aboveWindows: true
         focusable: false
@@ -377,15 +379,20 @@ ShellRoot {
             }
         }
 
-        Column {
+        ListView {
+            id: popupList
+            anchors {
+                top: parent.top
+                right: parent.right
+                bottom: parent.bottom
+            }
             width: 360
+            interactive: false
             spacing: 8
+            model: notifServer.trackedNotifications
 
-            Repeater {
-                model: notifServer.trackedNotifications
-
-                delegate: Rectangle {
-                    readonly property var n: modelData
+            delegate: Rectangle {
+                readonly property var n: modelData
 
                     width: 360
                     radius: 10
@@ -434,7 +441,6 @@ ShellRoot {
                         onTapped: n.dismiss()
                     }
                 }
-            }
         }
     }
 }
