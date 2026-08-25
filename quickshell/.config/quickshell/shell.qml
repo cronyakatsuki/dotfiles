@@ -342,8 +342,7 @@ ShellRoot {
             right: 8
         }
         implicitWidth: 360
-        implicitHeight: notifList.contentHeight + 8
-        visible: notifList.contentHeight > 0   // map fresh per popup, don't resize from 0
+        visible: notifServer.trackedNotifications.values.length > 0   // remap fresh per popup group
         exclusiveZone: 0           // float over content, don't reserve space
         aboveWindows: true
         focusable: false
@@ -378,16 +377,15 @@ ShellRoot {
             }
         }
 
-        ListView {
-            id: notifList
+        Column {
             width: 360
-            height: notifList.contentHeight
-            interactive: false
             spacing: 8
-            model: notifServer.trackedNotifications
 
-            delegate: Rectangle {
-                readonly property var n: modelData
+            Repeater {
+                model: notifServer.trackedNotifications
+
+                delegate: Rectangle {
+                    readonly property var n: modelData
 
                     width: 360
                     radius: 10
@@ -436,6 +434,7 @@ ShellRoot {
                         onTapped: n.dismiss()
                     }
                 }
+            }
         }
     }
 }
