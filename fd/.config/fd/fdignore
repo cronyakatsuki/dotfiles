@@ -1,0 +1,11 @@
+# ~/.config/fd/fdignore — global ignore rules for fd (gitignore syntax)
+# Applies to every fd invocation regardless of directory.
+# See the fdignore section: https://github.com/sharkdp/fd#fdignore
+
+.git/
+node_modules/
+target/
+__pycache__/
+.venv/
+venv/
+*.pyc
