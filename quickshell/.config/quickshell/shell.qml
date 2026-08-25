@@ -141,12 +141,11 @@ ShellRoot {
 
         function manage(notif) {
             notif.tracked = true    // keep alive + show in trackedNotifications
-            const ms = notif.urgency === NotificationUrgency.Enum.Critical ? 15000
-                     : notif.urgency === NotificationUrgency.Enum.Low ? 6000 : 8000
-            expiry[notif.id] = { notif: notif, deadline: Date.now() + ms }
+            const ms = notif.urgency === NotificationUrgency.Enum.Critical ? 25000
+                     : notif.urgency === NotificationUrgency.Enum.Low ? 10000 : 15000
+            notifications.expiry[notif.id] = { notif: notif, deadline: Date.now() + ms }
             notif.closed.connect(() => { delete notifications.expiry[notif.id] })
             if (!expiryTimer.running) expiryTimer.restart()
-            console.log("DS managed:", notif.appName, notif.tracked)
         }
 
         Timer {
