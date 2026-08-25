@@ -195,16 +195,16 @@ ShellRoot {
                     font.pointSize: 12
                 }
 
-                TapHandler {
-                    onTapped: volumeWidget.node.audio.muted = !volumeWidget.node.audio.muted
-                }
-                WheelHandler {
-                    onWheel: event => {
+                MouseArea {
+                    id: volumeMa
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    onClicked: volumeWidget.node.audio.muted = !volumeWidget.node.audio.muted
+                    onWheel: wheel => {
                         const n = volumeWidget.node
-                        if (n) {
-                            const delta = event.angleDelta.y > 0 ? 0.05 : -0.05
-                            n.audio.volume = Math.max(0, Math.min(1.5, n.audio.volume + delta))
-                        }
+                        if (!n) return
+                        const delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
+                        n.audio.volume = Math.max(0, Math.min(1.5, n.audio.volume + delta))
                     }
                 }
             }
