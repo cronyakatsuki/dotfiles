@@ -50,8 +50,8 @@ ShellRoot {
             Repeater {
                 model: niri.workspaces
                 delegate: Rectangle {
-                    width: 30
-                    height: 26
+                    width: 32
+                    height: 28
                     radius: 5
                     color: model.isFocused ? "#B4BEFE" : "#313244"
 
@@ -64,7 +64,7 @@ ShellRoot {
                         }
                         color: model.isFocused ? "#11111B" : "#CDD6F4"
                         font.family: "Inter"
-                        font.pointSize: 11
+                        font.pointSize: 13
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -82,7 +82,7 @@ ShellRoot {
                 text: niri.focusedWindow?.title ?? ""
                 color: "#CDD6F4"
                 font.family: "Inter"
-                font.pointSize: 11
+                font.pointSize: 13
                 elide: Text.ElideRight
                 verticalAlignment: Text.AlignVCenter
             }
@@ -98,7 +98,7 @@ ShellRoot {
             text: Qt.formatTime(clock.date, "HH:mm")
             color: "#CDD6F4"
             font.family: "Inter"
-            font.pointSize: 11
+            font.pointSize: 13
 
             SystemClock {
                 id: clock
