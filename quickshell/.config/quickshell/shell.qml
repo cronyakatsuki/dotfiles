@@ -139,20 +139,16 @@ ShellRoot {
         color: "transparent"
 
         // ---- our own popup stack (Notifications are not 'tracked') ----
-        property var popups: []
+        ListModel { id: popups }
 
         function remove(notif) {
-            const i = popups.indexOf(notif)
-            if (i < 0) return
-            popups.splice(i, 1)
-            popups = popups.slice()          // new array -> notifies Repeater
+            for (let i = 0; i < popups.count; ++i) {
+                if (popups.get(i).notif === notif) { popups.remove(i); break }
+            }
         }
 
         function manage(notif) {
-            popups.push(notif)
-            popups = popups.slice()
-
-            // drop the card if/when the daemon closes it
+            popups.append({ notif: notif })
             notif.closed.connect(() => remove(notif))
 
             // auto-expire after a delay based on urgency
@@ -162,8 +158,6 @@ ShellRoot {
             t.interval = ms
             t.running = true
             t.onTriggered.connect(() => { remove(notif); t.destroy() })
-
-            console.log("DS notif:", notif.appName, "|", notif.summary, "| popups:", popups.length)
         }
 
         Column {
@@ -171,11 +165,10 @@ ShellRoot {
             spacing: 8
 
             Repeater {
-                model: notifications.popups
+                model: popups
 
                 delegate: Rectangle {
-                    required property var modelData
-                    readonly property var n: modelData
+                    readonly property var n: model.notif
 
                     width: 360
                     radius: 10
