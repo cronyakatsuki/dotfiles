@@ -144,7 +144,7 @@ ShellRoot {
             const ms = notif.urgency === NotificationUrgency.Enum.Critical ? 15000
                      : notif.urgency === NotificationUrgency.Enum.Low ? 6000 : 8000
             expiry[notif.id] = { notif: notif, deadline: Date.now() + ms }
-            notif.closed.connect(() => { delete expiry[notif.id] })
+            notif.closed.connect(() => { delete notifications.expiry[notif.id] })
             if (!expiryTimer.running) expiryTimer.restart()
             console.log("DS managed:", notif.appName, notif.tracked)
         }
@@ -156,10 +156,10 @@ ShellRoot {
             running: false
             onTriggered: {
                 const now = Date.now()
-                for (const id of Object.keys(expiry)) {
-                    const e = expiry[id]
+                for (const id of Object.keys(notifications.expiry)) {
+                    const e = notifications.expiry[id]
                     if (e && now >= e.deadline) {
-                        delete expiry[id]
+                        delete notifications.expiry[id]
                         e.notif.expire()
                     }
                 }
