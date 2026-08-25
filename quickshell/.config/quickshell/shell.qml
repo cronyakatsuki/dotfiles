@@ -111,8 +111,8 @@ ShellRoot {
                 spacing: 4
                 visible: monitorText.text !== ""
 
-                // shell one-liner: prints "<cpu%> <mem%> <gpu°C>" in one line
-                // (CPU is a 0.4s delta sample; memory uses total-available)
+                // shell one-liner: prints "<cpu%> <mem%> <gpu°C> <cpu°C>" in one line
+                // (CPU % is a 0.4s delta sample; CPU temp = x86_pkg_temp w/ coretemp fallback)
                 property string monitorScript: `t1=$(awk '/^cpu /{u=$2+$4;i=$5} END{print u+i}' /proc/stat)
 b1=$(awk '/^cpu /{u=$2+$4;i=$5} END{print u}' /proc/stat)
 sleep 0.4
@@ -121,15 +121,11 @@ b2=$(awk '/^cpu /{u=$2+$4;i=$5} END{print u}' /proc/stat)
 cpu=$(( (b2-b1)*100/(t2-t1) ))
 mem=$(awk '/MemTotal:/{t=$2} /MemAvailable:/{a=$2} END{printf "%d", (t-a)*100/t}' /proc/meminfo)
 gpu=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null || echo 0)
-printf "%d %d %d" "$cpu" "$mem" "$gpu"
+ct=$(awk '{printf "%d", $1/1000}' /sys/class/thermal/thermal_zone0/temp 2>/dev/null)
+[ -z "$ct" ] && ct=$(awk '{printf "%d", $1/1000}' /sys/class/hwmon/hwmon2/temp1_input 2>/dev/null || echo 0)
+printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
 `
 
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: "file:///usr/share/icons/Papirus-Dark/16x16/devices/cpu.svg"
-                    sourceSize.width: 14
-                    sourceSize.height: 14
-                }
                 Text {
                     id: monitorText
                     anchors.verticalCenter: parent.verticalCenter
@@ -149,8 +145,8 @@ printf "%d %d %d" "$cpu" "$mem" "$gpu"
                     stdout: StdioCollector { waitForEnd: true }
                     onExited: {
                         const out = monitorProc.stdout.text.trim()
-                        const m = out.match(/^(\d+) (\d+) (\d+)$/)
-                        if (m) monitorText.text = m[1] + "% · " + m[2] + "% · " + m[3] + "°"
+                        const m = out.match(/^(\d+) (\d+) (\d+) (\d+)$/)
+                        if (m) monitorText.text = m[1] + "% · " + m[2] + "% · GPU " + m[3] + "° · CPU " + m[4] + "°"
                     }
                 }
 
