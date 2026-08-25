@@ -142,6 +142,10 @@ printf \"%d %d %d\" \"$cpu\" \"$mem\" \"$gpu\"
                 Process {
                     id: monitorProc
                     running: false
+                    environment: {
+                        "PATH": "/usr/local/bin:/usr/bin:/bin",
+                        "XDG_RUNTIME_DIR": "/run/user/1000"
+                    }
                     stdout: StdioCollector { waitForEnd: true }
                     onStarted: console.log("MON started")
                     onExited: {
