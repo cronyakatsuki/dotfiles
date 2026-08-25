@@ -15,6 +15,8 @@ import QtQuick     // Row, Text, Rectangle, Repeater, Timer...
 import Niri        // the qml-niri plugin: workspaces, windows, overview, etc.
 import Quickshell.Services.Notifications  // notification daemon + Notification type
 import Quickshell.Services.SystemTray     // SystemTray singleton + SystemTrayItem
+import Quickshell.Services.Pipewire       // volume widget: Pipewire, PwNode, PwObjectTracker
+import Quickshell.Services.Mpris          // media widget: Mpris, MprisPlayer
 import Quickshell.Widgets                 // IconImage (icon-style images)
 
 ShellRoot {
@@ -91,7 +93,7 @@ ShellRoot {
             }
         }
 
-        // ---------- right: clock + system tray ----------
+        // ---------- right: media + volume + clock + system tray ----------
         Row {
             id: rightSide
             spacing: 10
@@ -99,6 +101,109 @@ ShellRoot {
                 right: parent.right
                 rightMargin: 8
                 verticalCenter: parent.verticalCenter
+            }
+
+            // media player — shows the current MPRIS track (spotifyd);
+            // prev / play-pause / next buttons, hidden when nothing plays.
+            Row {
+                id: mediaWidget
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 5
+                visible: player != null && player.trackTitle !== ""
+
+                readonly property var player: {
+                    const ps = Mpris.players.values
+                    for (const p of ps) if (p.isPlaying) return p
+                    return ps[0] ?? null
+                }
+
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "image://icon/media-skip-backward-symbolic"
+                    sourceSize.width: 14
+                    sourceSize.height: 14
+                    TapHandler {
+                        onTapped: if (mediaWidget.player?.canGoPrevious) mediaWidget.player.previous()
+                    }
+                }
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "image://icon/" + (mediaWidget.player?.isPlaying
+                        ? "media-playback-pause-symbolic"
+                        : "media-playback-start-symbolic")
+                    sourceSize.width: 14
+                    sourceSize.height: 14
+                    TapHandler {
+                        onTapped: if (mediaWidget.player?.canTogglePlaying) mediaWidget.player.togglePlaying()
+                    }
+                }
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "image://icon/media-skip-forward-symbolic"
+                    sourceSize.width: 14
+                    sourceSize.height: 14
+                    TapHandler {
+                        onTapped: if (mediaWidget.player?.canGoNext) mediaWidget.player.next()
+                    }
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 240
+                    elide: Text.ElideRight
+                    font.family: "Inter"
+                    font.pointSize: 12
+                    color: "#A6ADC8"            // subtext0
+                    text: mediaWidget.player
+                        ? mediaWidget.player.trackArtist + " — " + mediaWidget.player.trackTitle
+                        : ""
+                }
+            }
+
+            // volume — icon + %, scroll = level, click = mute
+            PwObjectTracker {
+                objects: [Pipewire.defaultAudioSink]
+            }
+
+            Row {
+                id: volumeWidget
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 4
+
+                readonly property var node: Pipewire.defaultAudioSink
+
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "image://icon/" + {
+                        const v = volumeWidget.node?.audio?.volume ?? 0
+                        if (volumeWidget.node?.audio?.muted || v <= 0) return "audio-volume-muted-symbolic"
+                        if (v < 0.34) return "audio-volume-low-symbolic"
+                        if (v < 0.67) return "audio-volume-medium-symbolic"
+                        return "audio-volume-high-symbolic"
+                    }
+                    sourceSize.width: 16
+                    sourceSize.height: 16
+                }
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Math.round((volumeWidget.node?.audio?.volume ?? 0) * 100) + "%"
+                    color: "#CDD6F4"
+                    font.family: "Inter"
+                    font.pointSize: 12
+                }
+
+                TapHandler {
+                    onTapped: volumeWidget.node.audio.muted = !volumeWidget.node.audio.muted
+                }
+                WheelHandler {
+                    onWheeled: event => {
+                        const n = volumeWidget.node
+                        if (n) {
+                            const delta = event.angleDelta.y > 0 ? 0.05 : -0.05
+                            n.audio.volume = Math.max(0, Math.min(1.5, n.audio.volume + delta))
+                        }
+                    }
+                }
             }
 
             // clock
