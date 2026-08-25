@@ -10,7 +10,7 @@
  * - Managed via GNU Stow at ~/dotfiles/
  * - Each config is its own stow package (one dir = one package)
  * - Package structure: <name>/.config/<name>/<file>
- * - Install all: cd ~/dotfiles && stow */
+ * - Install all: cd ~/dotfiles && stow *
  * - Install single: cd ~/dotfiles && stow <package>
  * - See ~/dotfiles/DOTFILES_CONVENTION.md
  *
@@ -25,7 +25,14 @@ import {
   type ExtensionAPI,
 } from "@earendil-works/pi-coding-agent";
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, realpathSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  copyFileSync,
+  readFileSync,
+  writeFileSync,
+  realpathSync,
+} from "node:fs";
 import { dirname, basename, resolve } from "node:path";
 
 const MAX_BACKUPS = 5;
@@ -38,7 +45,11 @@ function getBackupDir(file: string): string {
   const home = process.env.HOME || "/home/crony";
 
   // For system/home config files, use XDG data home
-  if (dir === home || dir.startsWith(`${home}/.config`) || dir.startsWith("/etc")) {
+  if (
+    dir === home ||
+    dir.startsWith(`${home}/.config`) ||
+    dir.startsWith("/etc")
+  ) {
     const dataHome = process.env.XDG_DATA_HOME || `${home}/.local/share`;
     const safeName = absFile.replace(/^\//, "").replace(/\//g, "_");
     return `${dataHome}/safe-edit/backups/${safeName}`;
@@ -55,7 +66,9 @@ function createBackup(file: string): string | null {
   // Resolve through symlinks (for Stow-managed files)
   try {
     file = realpathSync(file);
-  } catch {}
+  } catch {
+    // path may not exist yet (e.g. a new write) — proceed without a backup
+  }
   if (!existsSync(file)) return null;
 
   const bdir = getBackupDir(file);
@@ -70,7 +83,9 @@ function createBackup(file: string): string | null {
     // Make backup read-only for user to prevent accidental edits
     const { chmodSync } = require("node:fs");
     chmodSync(backupFile, 0o600);
-  } catch {}
+  } catch {
+    // chmod may fail on some filesystems — the backup itself is what matters
+  }
 
   return backupFile;
 }
@@ -79,16 +94,19 @@ function rotateBackups(file: string): void {
   // Resolve through symlinks
   try {
     file = realpathSync(file);
-  } catch {}
+  } catch {
+    // nothing to resolve — use the path as-is
+  }
   const bdir = getBackupDir(file);
   if (!existsSync(bdir)) return;
 
   const base = basename(file);
-  const backups: string[] = [];
 
   try {
     const { readdirSync } = require("node:fs");
-    const files = readdirSync(bdir).filter((f: string) => f.startsWith(base + "."));
+    const files = readdirSync(bdir).filter((f: string) =>
+      f.startsWith(base + "."),
+    );
     files.sort((a: string, b: string) => {
       const ta = parseInt(a.split(".").pop() || "0", 10);
       const tb = parseInt(b.split(".").pop() || "0", 10);
@@ -101,10 +119,14 @@ function rotateBackups(file: string): void {
         try {
           const { unlinkSync } = require("node:fs");
           unlinkSync(`${bdir}/${f}`);
-        } catch {}
+        } catch {
+          // best-effort rotation — ignore individual failures
+        }
       }
     }
-  } catch {}
+  } catch {
+    // readdir/rotation failure — ignore, backups are best-effort
+  }
 }
 
 function isInGitRepo(file: string): string | null {
@@ -133,7 +155,9 @@ function generateCommitMessage(file: string, gitRoot: string): string {
       if (d > 0) return `update: ${base} (-${d} lines)`;
       return `update: ${base}`;
     }
-  } catch {}
+  } catch {
+    // git diff unavailable — fall through to a generic message
+  }
   return `update: ${base}`;
 }
 
@@ -167,11 +191,16 @@ function gitCommitIfNeeded(file: string): void {
       stdio: ["pipe", "pipe", "pipe"],
     });
 
-    execSync(`git commit -m "${msg.replace(/"/g, '\\"')}" --no-gpg-sign -- "${realFile}" 2>/dev/null`, {
-      cwd: gitRoot,
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-  } catch {}
+    execSync(
+      `git commit -m "${msg.replace(/"/g, '\\"')}" --no-gpg-sign -- "${realFile}" 2>/dev/null`,
+      {
+        cwd: gitRoot,
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    );
+  } catch {
+    // git commit is best-effort — never break the edit/write call
+  }
 }
 
 function isYadmManaged(file: string): boolean {
@@ -191,10 +220,15 @@ function yadmCommit(file: string): void {
 
   try {
     const msg = `update: ${basename(file)}`;
-    execSync(`yadm add "${file}" 2>/dev/null && yadm commit -m "${msg}" 2>/dev/null`, {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-  } catch {}
+    execSync(
+      `yadm add "${file}" 2>/dev/null && yadm commit -m "${msg}" 2>/dev/null`,
+      {
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    );
+  } catch {
+    // yadm not present or commit failed — ignore, backups are best-effort
+  }
 }
 
 function isChezmoiManaged(file: string): boolean {
@@ -221,11 +255,16 @@ function chezmoiCommit(file: string): void {
     if (!gitRoot) return;
 
     const msg = `update: ${basename(file)}`;
-    execSync(`git add "${src}" 2>/dev/null && git commit -m "${msg}" --no-gpg-sign 2>/dev/null`, {
-      cwd: gitRoot,
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-  } catch {}
+    execSync(
+      `git add "${src}" 2>/dev/null && git commit -m "${msg}" --no-gpg-sign 2>/dev/null`,
+      {
+        cwd: gitRoot,
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    );
+  } catch {
+    // chezmoi commit is best-effort — don't block the tool call
+  }
 }
 
 function commitIfManaged(file: string): void {
