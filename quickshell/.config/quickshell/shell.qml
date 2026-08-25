@@ -119,13 +119,14 @@ ShellRoot {
             // start/end is obvious.
             Rectangle {
                 id: trayBox
+                visible: trayRepeater.count > 0   // hide when nothing is in the tray
                 radius: 6
                 height: 30
                 color: "#181825"             // catppuccin mocha mantle (darker than bar base)
                 border.color: "#313244"      // surface0 edge
                 border.width: 1
                 anchors.verticalCenter: parent.verticalCenter
-                implicitWidth: Math.max(trayRow.implicitWidth + 8, 26)
+                implicitWidth: trayRow.implicitWidth + 8
 
                 Row {
                     id: trayRow
@@ -133,6 +134,7 @@ ShellRoot {
                     spacing: 2
 
                     Repeater {
+                        id: trayRepeater
                         model: SystemTray.items
 
                         delegate: Rectangle {
