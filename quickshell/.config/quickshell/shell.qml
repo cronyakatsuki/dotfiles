@@ -103,6 +103,65 @@ ShellRoot {
                 verticalCenter: parent.verticalCenter
             }
 
+            // system monitor — CPU / RAM / GPU temp, polled every 2s
+            Row {
+                id: monitorWidget
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 4
+                visible: monitorText.text !== ""
+
+                // shell one-liner: prints "<cpu%> <mem%> <gpu°C>" in one line
+                // (CPU is a 0.4s delta sample; memory uses total-available)
+                property string monitorScript: `t1=$(awk "/^cpu /{u=\$2+\$4;i=\$5} END{print u+i}" /proc/stat)
+b1=$(awk "/^cpu /{u=\$2+\$4;i=\$5} END{print u}" /proc/stat)
+sleep 0.4
+t2=$(awk "/^cpu /{u=\$2+\$4;i=\$5} END{print u+i}" /proc/stat)
+b2=$(awk "/^cpu /{u=\$2+\$4;i=\$5} END{print u}" /proc/stat)
+cpu=$(( (b2-b1)*100/(t2-t1) ))
+mem=$(awk "/MemTotal:/{t=\$2} /MemAvailable:/{a=\$2} END{printf \"%d\", (t-a)*100/t}" /proc/meminfo)
+gpu=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null || echo 0)
+printf \"%d %d %d\" \"$cpu\" \"$mem\" \"$gpu\"
+`
+
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "file:///usr/share/icons/Papirus-Dark/16x16/devices/cpu.svg"
+                    sourceSize.width: 14
+                    sourceSize.height: 14
+                }
+                Text {
+                    id: monitorText
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: ""
+                    color: "#A6ADC8"            // subtext0
+                    font.family: "Inter"
+                    font.pointSize: 12
+                }
+
+                Process {
+                    id: monitorProc
+                    running: false
+                    stdout: StdioCollector { waitForEnd: true }
+                    onExited: {
+                        const out = monitorProc.stdout.text.trim()
+                        const m = out.match(/^(\d+) (\d+) (\d+)$/)
+                        if (m) monitorText.text = m[1] + "% · " + m[2] + "% · " + m[3] + "°"
+                    }
+                }
+
+                Timer {
+                    id: monitorTimer
+                    interval: 2000
+                    repeat: true
+                    running: true
+                    triggeredOnStart: true
+                    onTriggered: {
+                        monitorProc.command = ["sh", "-c", monitorWidget.monitorScript]
+                        monitorProc.running = true
+                    }
+                }
+            }
+
             // media player — shows the current MPRIS track (spotifyd);
             // prev / play-pause / next buttons, hidden when nothing plays.
             Row {
