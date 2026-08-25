@@ -20,6 +20,34 @@ import Quickshell.Services.Mpris          // media widget: Mpris, MprisPlayer
 import Quickshell.Io                       // Process + StdioCollector (system monitor)
 import Quickshell.Widgets                 // IconImage (icon-style images)
 
+// Module wrapper: full bar height with a 2px accent underline at the bottom.
+// Children go into an inner Row (centered); hides together with its content.
+component ModuleBar: Item {
+    id: moduleRoot
+    property color accent: "#B4BEFE"
+    default property alias content: row.data
+
+    width: row.implicitWidth + 8
+    height: 44                      // bar height
+    visible: row.implicitWidth > 0  // hide with the content
+
+    Row {
+        id: row
+        anchors.centerIn: parent
+        spacing: 0
+    }
+
+    Rectangle {
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+        height: 2
+        color: accent
+    }
+}
+
 ShellRoot {
     PanelWindow {
         id: bar
@@ -53,28 +81,31 @@ ShellRoot {
             }
 
             // workspaces switcher
-            Repeater {
-                model: niri.workspaces
-                delegate: Rectangle {
-                    width: 32
-                    height: 28
-                    radius: 5
-                    color: model.isFocused ? "#B4BEFE" : "#313244"
+            ModuleBar {
+                accent: "#B4BEFE"                     // lavender
+                Repeater {
+                    model: niri.workspaces
+                    delegate: Rectangle {
+                        width: 32
+                        height: 28
+                        radius: 5
+                        color: model.isFocused ? "#B4BEFE" : "#313244"
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: {
-                            var kanji = ["〇", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
-                            var n = parseInt(model.name) || (model.index + 1)
-                            return kanji[n] ? kanji[n] : String(n)
+                        Text {
+                            anchors.centerIn: parent
+                            text: {
+                                var kanji = ["〇", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+                                var n = parseInt(model.name) || (model.index + 1)
+                                return kanji[n] ? kanji[n] : String(n)
+                            }
+                            color: model.isFocused ? "#11111B" : "#CDD6F4"
+                            font.family: "Inter"
+                            font.pointSize: 13
                         }
-                        color: model.isFocused ? "#11111B" : "#CDD6F4"
-                        font.family: "Inter"
-                        font.pointSize: 13
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: niri.focusWorkspaceById(model.id)
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: niri.focusWorkspaceById(model.id)
+                        }
                     }
                 }
             }
@@ -83,14 +114,17 @@ ShellRoot {
             Rectangle { width: 1; height: 20; color: "#45475A" }
 
             // focused window title
-            Text {
-                width: 240
-                text: niri.focusedWindow?.title ?? ""
-                color: "#CDD6F4"
-                font.family: "Inter"
-                font.pointSize: 13
-                elide: Text.ElideRight
-                verticalAlignment: Text.AlignVCenter
+            ModuleBar {
+                accent: "#89B4FA"                     // blue
+                Text {
+                    width: 240
+                    text: niri.focusedWindow?.title ?? ""
+                    color: "#CDD6F4"
+                    font.family: "Inter"
+                    font.pointSize: 13
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
         }
 
@@ -105,11 +139,13 @@ ShellRoot {
             }
 
             // system monitor — CPU / RAM / GPU temp, polled every 2s
-            Row {
-                id: monitorWidget
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 4
-                visible: monitorText.text !== ""
+            ModuleBar {
+                accent: "#94E2D5"                     // teal
+                Row {
+                    id: monitorWidget
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 4
+                    visible: monitorText.text !== ""
 
                 // shell one-liner: prints "<cpu%> <mem%> <gpu°C> <cpu°C>" in one line
                 // (CPU % is a 0.4s delta sample; CPU temp = x86_pkg_temp w/ coretemp fallback)
@@ -146,7 +182,7 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                     onExited: {
                         const out = monitorProc.stdout.text.trim()
                         const m = out.match(/^(\d+) (\d+) (\d+) (\d+)$/)
-                        if (m) monitorText.text = m[1] + "% · " + m[2] + "% · GPU " + m[3] + "° · CPU " + m[4] + "°"
+                        if (m) monitorText.text = "CPU " + m[1] + "% · RAM " + m[2] + "% · GPU " + m[3] + "° · CPU " + m[4] + "°"
                     }
                 }
 
@@ -161,15 +197,18 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                         monitorProc.running = true
                     }
                 }
+                }
             }
 
             // media player — shows the current MPRIS track (spotifyd);
             // prev / play-pause / next buttons, hidden when nothing plays.
-            Row {
-                id: mediaWidget
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 5
-                visible: player != null && player.trackTitle !== ""
+            ModuleBar {
+                accent: "#F5C2E7"                     // pink
+                Row {
+                    id: mediaWidget
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 5
+                    visible: player != null && player.trackTitle !== ""
 
                 readonly property var player: {
                     const ps = Mpris.players.values
@@ -218,14 +257,17 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                         ? mediaWidget.player.trackArtist + " — " + mediaWidget.player.trackTitle
                         : ""
                 }
+                }
             }
 
             // volume — icon + %, scroll = level, click = mute
-            PwObjectTracker {
-                objects: [Pipewire.defaultAudioSink]
-            }
+            ModuleBar {
+                accent: "#A6E3A1"                     // green
+                PwObjectTracker {
+                    objects: [Pipewire.defaultAudioSink]
+                }
 
-            Item {
+                Item {
                 id: volumeWidget
                 anchors.verticalCenter: parent.verticalCenter
                 implicitWidth: volumeInner.implicitWidth
@@ -289,10 +331,13 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                         n.audio.volume = Math.max(0, Math.min(1.0, n.audio.volume + delta))
                     }
                 }
+                }
             }
 
             // clock
-            Text {
+            ModuleBar {
+                accent: "#F9E2AF"                     // yellow
+                Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: Qt.formatTime(clock.date, "HH:mm")
                 color: "#CDD6F4"
@@ -303,11 +348,14 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                     id: clock
                     precision: SystemClock.Minutes // no seconds -> less work
                 }
+                }
             }
 
             // system tray — pinned to the far right, darker chip so its
             // start/end is obvious.
-            Rectangle {
+            ModuleBar {
+                accent: "#FAB387"                     // peach
+                Rectangle {
                 id: trayBox
                 visible: trayRepeater.count > 0   // hide when nothing is in the tray
                 radius: 6
@@ -359,6 +407,7 @@ printf "%d %d %d %d" "$cpu" "$mem" "$gpu" "$ct"
                         }
                     }
                 }
+            }
             }
         }
     }
