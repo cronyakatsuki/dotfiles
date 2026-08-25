@@ -165,10 +165,11 @@ ShellRoot {
                 objects: [Pipewire.defaultAudioSink]
             }
 
-            Row {
+            Item {
                 id: volumeWidget
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 4
+                implicitWidth: volumeInner.implicitWidth
+                implicitHeight: volumeInner.implicitHeight
 
                 readonly property var node: Pipewire.defaultAudioSink
                 // Papirus-Dark icon paths (Qt can't resolve themed icons under niri)
@@ -181,22 +182,26 @@ ShellRoot {
                     return "file:///usr/share/icons/Papirus-Dark/16x16/actions/" + name + ".svg"
                 }
 
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: volumeWidget.volumeIconPath
-                    sourceSize.width: 16
-                    sourceSize.height: 16
-                }
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: Math.round((volumeWidget.node?.audio?.volume ?? 0) * 100) + "%"
-                    color: "#CDD6F4"
-                    font.family: "Inter"
-                    font.pointSize: 12
+                Row {
+                    id: volumeInner
+                    spacing: 4
+
+                    Image {
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: volumeWidget.volumeIconPath
+                        sourceSize.width: 16
+                        sourceSize.height: 16
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Math.round((volumeWidget.node?.audio?.volume ?? 0) * 100) + "%"
+                        color: "#CDD6F4"
+                        font.family: "Inter"
+                        font.pointSize: 12
+                    }
                 }
 
                 MouseArea {
-                    id: volumeMa
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton
                     onClicked: volumeWidget.node.audio.muted = !volumeWidget.node.audio.muted
