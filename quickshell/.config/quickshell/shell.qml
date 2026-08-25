@@ -57,7 +57,11 @@ ShellRoot {
 
                     Text {
                         anchors.centerIn: parent
-                        text: model.name || model.index
+                        text: {
+                            var kanji = ["〇", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+                            var n = parseInt(model.name) || (model.index + 1)
+                            return kanji[n] ? kanji[n] : String(n)
+                        }
                         color: model.isFocused ? "#11111B" : "#CDD6F4"
                         font.family: "Inter"
                         font.pointSize: 11
