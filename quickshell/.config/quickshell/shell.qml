@@ -160,7 +160,7 @@ printf \"%d %d %d\" \"$cpu\" \"$mem\" \"$gpu\"
                     running: true
                     triggeredOnStart: true
                     onTriggered: {
-                        console.log("MON tick")
+                        console.log("MON script:", JSON.stringify(monitorWidget.monitorScript))
                         monitorProc.command = ["sh", "-c", monitorWidget.monitorScript]
                         monitorProc.running = true
                     }
