@@ -24,6 +24,8 @@ environment {
 
 // Custom Quickshell shell (bar + widgets, niri IPC via NIRI_SOCKET)
 spawn-at-startup "quickshell"
+// CachyOS update checker tray icon (arch-update --tray registers an SNI item)
+spawn-at-startup "arch-update" "--tray"
 
 input {
     keyboard {
