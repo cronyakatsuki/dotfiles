@@ -4,6 +4,11 @@
 *.swp
 *.swo
 
+# ---- Editor/tool backups (safe-edit extension) ----
+# safe-edit-backup drops timestamped backups next to edited files (e.g. .backups/)
+# in every config dir; never sync those.
+**/.backups/
+
 # API keys and secrets
 .config/secrets.env
 
