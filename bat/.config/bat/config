@@ -1,1 +1,8 @@
+# ~/.config/bat/config — default flags for bat
+# --paging=never: print straight to terminal (bat is used as fzf preview too,
+# where a pager would hang the pipe).
 --theme="Catppuccin Mocha"
+--paging=never
+# header shows file name, snip collapses long gaps, numbers = line numbers,
+# changes = git +/- markers on modified lines.
+--style=header,snip,numbers,changes
