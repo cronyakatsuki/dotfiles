@@ -197,7 +197,7 @@ ShellRoot {
                     onTapped: volumeWidget.node.audio.muted = !volumeWidget.node.audio.muted
                 }
                 WheelHandler {
-                    onWheeled: event => {
+                    onWheel: event => {
                         const n = volumeWidget.node
                         if (n) {
                             const delta = event.angleDelta.y > 0 ? 0.05 : -0.05
