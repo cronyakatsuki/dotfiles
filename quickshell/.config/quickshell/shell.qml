@@ -104,9 +104,9 @@ ShellRoot {
     // Notification daemon + popups.
     // NotificationServer registers org.freedesktop.Notifications on the
     // DBus so notify-send (e.g. zsh-auto-notify) works without hanging.
-    // Normal (transient) notifications are NOT in trackedNotifications,
-    // so we keep our own popup list off the onNotification signal and
-    // auto-expire each card. Rendered catppuccin mocha, top-right below
+    // Notifications are marked tracked => daemon keeps them alive and puts
+    // them in trackedNotifications (which we render). A sweep timer expires
+    // each one based on urgency. Rendered catppuccin mocha, top-right below
     // the bar; click a card to dismiss it.
     // ------------------------------------------------------------------
     NotificationServer {
@@ -131,33 +131,39 @@ ShellRoot {
             right: 8
         }
         implicitWidth: 360
-        onImplicitWidthChanged: console.log("DS win w=", implicitWidth)
-        onImplicitHeightChanged: console.log("DS win h=", implicitHeight)
         exclusiveZone: 0           // float over content, don't reserve space
         aboveWindows: true
         focusable: false
         color: "transparent"
 
-        // ---- our own popup stack (Notifications are not 'tracked') ----
-        ListModel { id: popups }
-
-        function remove(notif) {
-            for (let i = 0; i < popups.count; ++i) {
-                if (popups.get(i).notif === notif) { popups.remove(i); break }
-            }
-        }
+        // ---- popup state: per-notification expiry deadlines ----
+        property var expiry: ({})   // id -> { notif, deadline }
 
         function manage(notif) {
-            popups.append({ notif: notif })
-            notif.closed.connect(() => remove(notif))
-
-            // auto-expire after a delay based on urgency
+            notif.tracked = true    // keep alive + show in trackedNotifications
             const ms = notif.urgency === NotificationUrgency.Enum.Critical ? 15000
                      : notif.urgency === NotificationUrgency.Enum.Low ? 6000 : 8000
-            const t = Qt.createQmlObject("import QtQuick; Timer { repeat: false }", notifications)
-            t.interval = ms
-            t.running = true
-            t.onTriggered.connect(() => { remove(notif); t.destroy() })
+            expiry[notif.id] = { notif: notif, deadline: Date.now() + ms }
+            notif.closed.connect(() => { delete expiry[notif.id] })
+            if (!expiryTimer.running) expiryTimer.restart()
+            console.log("DS managed:", notif.appName, notif.tracked)
+        }
+
+        Timer {
+            id: expiryTimer
+            interval: 500
+            repeat: true
+            running: false
+            onTriggered: {
+                const now = Date.now()
+                for (const id of Object.keys(expiry)) {
+                    const e = expiry[id]
+                    if (e && now >= e.deadline) {
+                        delete expiry[id]
+                        e.notif.expire()
+                    }
+                }
+            }
         }
 
         Column {
@@ -165,10 +171,10 @@ ShellRoot {
             spacing: 8
 
             Repeater {
-                model: popups
+                model: notifServer.trackedNotifications
 
                 delegate: Rectangle {
-                    readonly property var n: model.notif
+                    readonly property var n: modelData
 
                     width: 360
                     radius: 10
