@@ -119,7 +119,7 @@ ShellRoot {
 
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
-                    source: "image://icon/media-skip-backward-symbolic"
+                    source: "file:///usr/share/icons/Papirus-Dark/16x16/actions/media-skip-backward.svg"
                     sourceSize.width: 14
                     sourceSize.height: 14
                     TapHandler {
@@ -128,9 +128,9 @@ ShellRoot {
                 }
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
-                    source: "image://icon/" + (mediaWidget.player?.isPlaying
-                        ? "media-playback-pause-symbolic"
-                        : "media-playback-start-symbolic")
+                    source: "file:///usr/share/icons/Papirus-Dark/16x16/actions/" + (mediaWidget.player?.isPlaying
+                        ? "media-playback-pause.svg"
+                        : "media-playback-start.svg")
                     sourceSize.width: 14
                     sourceSize.height: 14
                     TapHandler {
@@ -139,7 +139,7 @@ ShellRoot {
                 }
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
-                    source: "image://icon/media-skip-forward-symbolic"
+                    source: "file:///usr/share/icons/Papirus-Dark/16x16/actions/media-skip-forward.svg"
                     sourceSize.width: 14
                     sourceSize.height: 14
                     TapHandler {
@@ -171,17 +171,19 @@ ShellRoot {
                 spacing: 4
 
                 readonly property var node: Pipewire.defaultAudioSink
-                readonly property string volumeIcon: {
+                // Papirus-Dark icon paths (Qt can't resolve themed icons under niri)
+                readonly property string volumeIconPath: {
                     const v = node?.audio?.volume ?? 0
-                    if (node?.audio?.muted || v <= 0) return "audio-volume-muted-symbolic"
-                    if (v < 0.34) return "audio-volume-low-symbolic"
-                    if (v < 0.67) return "audio-volume-medium-symbolic"
-                    return "audio-volume-high-symbolic"
+                    const name = node?.audio?.muted || v <= 0 ? "audio-volume-muted"
+                        : v < 0.34 ? "audio-volume-low"
+                        : v < 0.67 ? "audio-volume-medium"
+                        : "audio-volume-high"
+                    return "file:///usr/share/icons/Papirus-Dark/16x16/actions/" + name + ".svg"
                 }
 
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
-                    source: "image://icon/" + volumeWidget.volumeIcon
+                    source: volumeWidget.volumeIconPath
                     sourceSize.width: 16
                     sourceSize.height: 16
                 }
