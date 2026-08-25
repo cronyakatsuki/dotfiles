@@ -28,6 +28,11 @@ export RUSTUP_HOME="${XDG_DATA_HOME}/rustup"
 export CARGO_HOME="${XDG_DATA_HOME}/cargo"
 export ATUIN_DATA_DIR="${XDG_DATA_HOME}/atuin"
 
+# ---- ripgrep defaults (loaded from file, not auto-discovered) ----
+# rg only reads a config when RIPGREP_CONFIG_PATH points at one — every
+# line is one argument; see "CONFIGURATION FILES" in the rg man page.
+export RIPGREP_CONFIG_PATH="${XDG_CONFIG_HOME}/ripgrep/rg.conf"
+
 # ---- Sudo askpass helper (graphical password prompt) ----
 : "${SUDO_ASKPASS:=/usr/bin/ksshaskpass}"
 export SUDO_ASKPASS
