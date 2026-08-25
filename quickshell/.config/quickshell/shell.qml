@@ -143,10 +143,13 @@ printf \"%d %d %d\" \"$cpu\" \"$mem\" \"$gpu\"
                     id: monitorProc
                     running: false
                     stdout: StdioCollector { waitForEnd: true }
+                    onStarted: console.log("MON started")
                     onExited: {
+                        console.log("MON exited", exitCode, "out:", JSON.stringify(monitorProc.stdout.text))
                         const out = monitorProc.stdout.text.trim()
                         const m = out.match(/^(\d+) (\d+) (\d+)$/)
                         if (m) monitorText.text = m[1] + "% · " + m[2] + "% · " + m[3] + "°"
+                        else console.log("MON parse FAILED:", out)
                     }
                 }
 
@@ -157,6 +160,7 @@ printf \"%d %d %d\" \"$cpu\" \"$mem\" \"$gpu\"
                     running: true
                     triggeredOnStart: true
                     onTriggered: {
+                        console.log("MON tick")
                         monitorProc.command = ["sh", "-c", monitorWidget.monitorScript]
                         monitorProc.running = true
                     }
