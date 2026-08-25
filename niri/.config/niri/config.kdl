@@ -1,0 +1,131 @@
+// niri config — prepared for CachyOS + RTX 5060 Ti + Samsung Odyssey OLED G5 (G50SF)
+// Live-reloads on save. Validate before boot: niri validate
+
+environment {
+    // catppuccin mocha lavender (your Plasma theme) — forced for GTK apps
+    // (your gtk settings.ini has no gtk-theme-name, so this env is the reliable channel)
+    GTK_THEME "catppuccin-mocha-lavender-standard+default"
+
+    // Qt apps via Kvantum (theme: catppuccin-mocha-lavender, already configured)
+    QT_STYLE_OVERRIDE "kvantum"
+
+    // Cursor, matching your gtk cursor settings
+    XCURSOR_THEME "catppuccin-mocha-lavender-cursors"
+    XCURSOR_SIZE "36"
+
+    // Wayland-native browsers / electron apps
+    MOZ_ENABLE_WAYLAND "1"
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+
+    // NVIDIA (RTX 5060 Ti) — standard trio for GL/EGL apps under Wayland
+    GBM_BACKEND "nvidia-drm"
+    __GLX_VENDOR_LIBRARY_NAME "nvidia"
+}
+
+// Custom Quickshell shell (bar + widgets, niri IPC via NIRI_SOCKET)
+spawn-at-startup "quickshell"
+
+input {
+    keyboard {
+        xkb {
+            layout "hr"
+            variant "us"  // Croatian (US): US QWERTY positions + Croatian letters on AltGr
+        }
+        repeat-delay 250
+        repeat-rate 30
+        numlock
+    }
+    // mod-key defaults to Super when running on a TTY
+}
+
+output "DP-2" {
+    // 27" QD-OLED G50SF, 2560x1440 @ 180Hz — set explicitly because the
+    // monitor's preferred mode is 120Hz (niri would otherwise pick that)
+    mode "2560x1440@179.981"
+    variable-refresh-rate
+    // verify connector name with: niri msg outputs
+}
+
+layout {
+    gaps 8
+    center-focused-column "always"
+
+    default-column-width { proportion 0.5; }
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    focus-ring {
+        width 2
+        active-color "#B4BEFE"    // catppuccin mocha lavender
+        inactive-color "#45475A"  // catppuccin mocha surface1
+    }
+}
+
+window-rule {
+    match app-id="pavucontrol"
+    open-floating true
+}
+
+binds {
+    // ---- apps ----
+    Mod+Return { spawn "ghostty"; }
+    Mod+D      { spawn "fuzzel"; }
+    Mod+B { spawn "zen-browser"; }
+
+    // ---- window ops ----
+    Mod+Shift+Q           { close-window; }
+    Mod+V           { toggle-window-floating; }
+    Mod+F           { maximize-column; }
+    Mod+Shift+Space { center-column; }
+
+    // ---- focus, vi-style (H/L = between columns, J/K = within a column) ----
+    Mod+Left          { focus-column-left; }
+    Mod+Down          { focus-window-down; }
+    Mod+Up            { focus-window-up; }
+    Mod+Right         { focus-column-right; }
+    Mod+H             { focus-column-left; }
+    Mod+J             { focus-window-or-workspace-down; }
+    Mod+K             { focus-window-or-workspace-up; }
+    Mod+L             { focus-column-right; }
+    Mod+Shift+Left    { consume-or-expel-window-left; }
+    Mod+Shift+Right   { consume-or-expel-window-right; }
+
+    // ---- workspaces (scrollable strip) ----
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp   cooldown-ms=150 { focus-workspace-up; }
+
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+
+    Mod+Shift+1 { move-window-to-workspace 1; }
+    Mod+Shift+2 { move-window-to-workspace 2; }
+    Mod+Shift+3 { move-window-to-workspace 3; }
+    Mod+Shift+4 { move-window-to-workspace 4; }
+    Mod+Shift+5 { move-window-to-workspace 5; }
+    Mod+Shift+6 { move-window-to-workspace 6; }
+    Mod+Shift+7 { move-window-to-workspace 7; }
+    Mod+Shift+8 { move-window-to-workspace 8; }
+    Mod+Shift+9 { move-window-to-workspace 9; }
+
+    // ---- screenshots (built-in, no grim needed) ----
+    Print { screenshot; }
+
+    // ---- audio (PipeWire) ----
+    XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+    XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute        { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+
+    // ---- session ----
+    Mod+Escape  { spawn "swaylock"; }
+    Mod+Shift+E { quit; }
+}
