@@ -103,18 +103,21 @@ ShellRoot {
     // ------------------------------------------------------------------
     // Notification daemon + popups.
     // NotificationServer registers org.freedesktop.Notifications on the
-    // DBus, so notify-send (e.g. zsh-auto-notify) stops hanging. Popups
-    // render trackedNotifications in catppuccin mocha, top-right below
-    // the bar; click a popup to dismiss it.
+    // DBus so notify-send (e.g. zsh-auto-notify) works without hanging.
+    // Normal (transient) notifications are NOT in trackedNotifications,
+    // so we keep our own popup list off the onNotification signal and
+    // auto-expire each card. Rendered catppuccin mocha, top-right below
+    // the bar; click a card to dismiss it.
     // ------------------------------------------------------------------
     NotificationServer {
         id: notifServer
-        keepOnReload: true        // keep notifications across config reloads
+        keepOnReload: true
         bodyMarkupSupported: false
         bodySupported: true
         actionsSupported: false
         imageSupported: false
-        onNotification: n => console.log("DBG notif:", n.appName, "| tracked:", n.tracked, "| t/o:", n.expireTimeout, "| urgency:", n.urgency, "|", n.summary)
+
+        onNotification: n => notifications.manage(n)
     }
 
     PanelWindow {
@@ -124,23 +127,51 @@ ShellRoot {
             right: true
         }
         margins {
-            top: 36      // just below the 32px bar
+            top: 36       // just below the 32px bar
             right: 8
         }
         implicitWidth: 360
-        onImplicitWidthChanged: console.log("DBG win w=", implicitWidth)
-        onImplicitHeightChanged: console.log("DBG win h=", implicitHeight)
+        onImplicitWidthChanged: console.log("DS win w=", implicitWidth)
+        onImplicitHeightChanged: console.log("DS win h=", implicitHeight)
         exclusiveZone: 0           // float over content, don't reserve space
         aboveWindows: true
         focusable: false
         color: "transparent"
+
+        // ---- our own popup stack (Notifications are not 'tracked') ----
+        property var popups: []
+
+        function remove(notif) {
+            const i = popups.indexOf(notif)
+            if (i < 0) return
+            popups.splice(i, 1)
+            popups = popups.slice()          // new array -> notifies Repeater
+        }
+
+        function manage(notif) {
+            popups.push(notif)
+            popups = popups.slice()
+
+            // drop the card if/when the daemon closes it
+            notif.closed.connect(() => remove(notif))
+
+            // auto-expire after a delay based on urgency
+            const ms = notif.urgency === NotificationUrgency.Enum.Critical ? 15000
+                     : notif.urgency === NotificationUrgency.Enum.Low ? 6000 : 8000
+            const t = Qt.createQmlObject("import QtQuick; Timer { repeat: false }", notifications)
+            t.interval = ms
+            t.running = true
+            t.onTriggered.connect(() => { remove(notif); t.destroy() })
+
+            console.log("DS notif:", notif.appName, "|", notif.summary, "| popups:", popups.length)
+        }
 
         Column {
             width: 360
             spacing: 8
 
             Repeater {
-                model: notifServer.trackedNotifications
+                model: notifications.popups
 
                 delegate: Rectangle {
                     required property var modelData
