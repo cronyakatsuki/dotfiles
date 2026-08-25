@@ -17,7 +17,6 @@ import Quickshell.Services.Notifications  // notification daemon + Notification 
 import Quickshell.Services.SystemTray     // SystemTray singleton + SystemTrayItem
 import Quickshell.Services.Pipewire       // volume widget: Pipewire, PwNode, PwObjectTracker
 import Quickshell.Services.Mpris          // media widget: Mpris, MprisPlayer
-import Quickshell.Io                       // Process (spawn notify-send for sink changes)
 import Quickshell.Widgets                 // IconImage (icon-style images)
 
 ShellRoot {
@@ -202,13 +201,9 @@ ShellRoot {
                     }
                 }
 
-                // one-shot process for the "sink switched" notification
-                Process {
-                    id: sinkNotify
-                    running: false
-                }
-
-                // cycle the default audio sink on right-click (Easy Effects excluded)
+                // cycle the default audio sink on right-click (Easy Effects excluded).
+                // Sinks are matched by node object + description — never by numeric
+                // id, since Pipewire ids change on every daemon reload.
                 function cycleSink() {
                     const sinks = Pipewire.nodes.values.filter(n =>
                         n && n.isSink && !String(n.description ?? "").toLowerCase().includes("easy effects"))
@@ -217,10 +212,7 @@ ShellRoot {
                     const next = sinks[(sinks.indexOf(cur) + 1) % sinks.length]
                     if (!next) return
                     Pipewire.preferredDefaultAudioSink = next
-                    const name = next.description || next.name || "unknown sink"
-                    sinkNotify.command = ["notify-send", "--app-name=Sink switcher",
-                        "Audio output switched", name]
-                    sinkNotify.running = true
+                    osd.showSink(next.description || next.name || "unknown sink")
                 }
 
                 MouseArea {
@@ -441,6 +433,77 @@ ShellRoot {
                         onTapped: n.dismiss()
                     }
                 }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // OSD: "sink switched" indicator, centered a bit below mid-screen.
+    // Full-width layer window whose mask reveals only the card, so it
+    // never interacts with layout and never needs to resize.
+    // ------------------------------------------------------------------
+    PanelWindow {
+        id: osd
+        visible: false
+        anchors {
+            top: true
+            left: true
+            right: true
+        }
+        margins {
+            top: osd.osdTop       // a bit below the middle of the screen
+        }
+        implicitHeight: osdCard.height
+        mask: Region { item: osdCard }   // only the card shows / is interactive
+        exclusiveZone: 0
+        aboveWindows: true
+        focusable: false
+        color: "transparent"
+
+        property int osdTop: Math.round((Quickshell.screens[0]?.height ?? 1080) * 0.55)
+
+        function showSink(label) {
+            osdLabel.text = label
+            osdTimer.restart()
+            osd.visible = true
+        }
+
+        Rectangle {
+            id: osdCard
+            width: 320
+            height: 56
+            radius: 12
+            color: "#313244"             // surface0
+            border.color: "#45475A"      // surface1
+            border.width: 1
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            Row {
+                anchors.centerIn: parent
+                spacing: 12
+
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "file:///usr/share/icons/Papirus-Dark/16x16/actions/audio-volume-high.svg"
+                    sourceSize.width: 26
+                    sourceSize.height: 26
+                }
+                Text {
+                    id: osdLabel
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 240
+                    elide: Text.ElideRight
+                    text: ""
+                    color: "#CDD6F4"
+                    font.family: "Inter"
+                    font.pointSize: 13
+                }
+            }
+        }
+
+        Timer {
+            id: osdTimer
+            interval: 2200
+            onTriggered: osd.visible = false
         }
     }
 }
