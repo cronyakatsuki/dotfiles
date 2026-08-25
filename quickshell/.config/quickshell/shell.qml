@@ -126,7 +126,7 @@ ShellRoot {
             top: 36      // just below the 32px bar
             right: 8
         }
-        width: 360
+        implicitWidth: 360
         exclusiveZone: 0           // float over content, don't reserve space
         aboveWindows: true
         focusable: false
