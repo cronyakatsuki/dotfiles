@@ -22,7 +22,7 @@ ShellRoot {
             left: true
             right: true
         }
-        implicitHeight: 32
+        implicitHeight: 44
         color: "#1E1E2E" // catppuccin mocha base
 
         // ------------------------------------------------------------------
@@ -50,16 +50,17 @@ ShellRoot {
             Repeater {
                 model: niri.workspaces
                 delegate: Rectangle {
-                    width: 26
-                    height: 22
-                    radius: 4
+                    width: 30
+                    height: 26
+                    radius: 5
                     color: model.isFocused ? "#B4BEFE" : "#313244"
 
                     Text {
                         anchors.centerIn: parent
                         text: model.name || model.index
                         color: model.isFocused ? "#11111B" : "#CDD6F4"
-                        font.pixelSize: 12
+                        font.family: "Inter"
+                        font.pointSize: 11
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -69,14 +70,15 @@ ShellRoot {
             }
 
             // separator
-            Rectangle { width: 1; height: 16; color: "#45475A" }
+            Rectangle { width: 1; height: 20; color: "#45475A" }
 
             // focused window title
             Text {
                 width: 240
                 text: niri.focusedWindow?.title ?? ""
                 color: "#CDD6F4"
-                font.pixelSize: 12
+                font.family: "Inter"
+                font.pointSize: 11
                 elide: Text.ElideRight
                 verticalAlignment: Text.AlignVCenter
             }
@@ -91,7 +93,8 @@ ShellRoot {
             }
             text: Qt.formatTime(clock.date, "HH:mm")
             color: "#CDD6F4"
-            font.pixelSize: 12
+            font.family: "Inter"
+            font.pointSize: 11
 
             SystemClock {
                 id: clock
@@ -127,7 +130,7 @@ ShellRoot {
             right: true
         }
         margins {
-            top: 36       // just below the 32px bar
+            top: 48       // just below the 44px bar
             right: 8
         }
         implicitWidth: 360
@@ -191,6 +194,7 @@ ShellRoot {
                         Text {
                             text: n.appName
                             color: "#B4BEFE"      // lavender
+                            font.family: "Inter"
                             font.pixelSize: 11
                             font.bold: true
                         }
@@ -198,6 +202,7 @@ ShellRoot {
                             width: parent.width
                             text: n.summary
                             color: "#CDD6F4"      // text
+                            font.family: "Inter"
                             font.pixelSize: 12
                             font.bold: true
                             wrapMode: Text.Wrap
@@ -207,6 +212,7 @@ ShellRoot {
                             visible: n.body.length > 0
                             text: n.body
                             color: "#A6ADC8"      // subtext0
+                            font.family: "Inter"
                             font.pixelSize: 11
                             wrapMode: Text.Wrap
                         }
