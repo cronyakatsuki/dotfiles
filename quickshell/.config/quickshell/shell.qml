@@ -113,15 +113,15 @@ ShellRoot {
 
                 // shell one-liner: prints "<cpu%> <mem%> <gpu°C>" in one line
                 // (CPU is a 0.4s delta sample; memory uses total-available)
-                property string monitorScript: `t1=$(awk "/^cpu /{u=\$2+\$4;i=\$5} END{print u+i}" /proc/stat)
-b1=$(awk "/^cpu /{u=\$2+\$4;i=\$5} END{print u}" /proc/stat)
+                property string monitorScript: `t1=$(awk '/^cpu /{u=$2+$4;i=$5} END{print u+i}' /proc/stat)
+b1=$(awk '/^cpu /{u=$2+$4;i=$5} END{print u}' /proc/stat)
 sleep 0.4
-t2=$(awk "/^cpu /{u=\$2+\$4;i=\$5} END{print u+i}" /proc/stat)
-b2=$(awk "/^cpu /{u=\$2+\$4;i=\$5} END{print u}" /proc/stat)
+t2=$(awk '/^cpu /{u=$2+$4;i=$5} END{print u+i}' /proc/stat)
+b2=$(awk '/^cpu /{u=$2+$4;i=$5} END{print u}' /proc/stat)
 cpu=$(( (b2-b1)*100/(t2-t1) ))
-mem=$(awk "/MemTotal:/{t=\$2} /MemAvailable:/{a=\$2} END{printf \"%d\", (t-a)*100/t}" /proc/meminfo)
+mem=$(awk '/MemTotal:/{t=$2} /MemAvailable:/{a=$2} END{printf "%d", (t-a)*100/t}' /proc/meminfo)
 gpu=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null || echo 0)
-printf \"%d %d %d\" \"$cpu\" \"$mem\" \"$gpu\"
+printf "%d %d %d" "$cpu" "$mem" "$gpu"
 `
 
                 Image {
@@ -165,7 +165,7 @@ printf \"%d %d %d\" \"$cpu\" \"$mem\" \"$gpu\"
                     triggeredOnStart: true
                     onTriggered: {
                         console.log("MON script:", JSON.stringify(monitorWidget.monitorScript))
-                        monitorProc.command = ["sh", "-c", monitorWidget.monitorScript]
+                        monitorProc.command = ["/usr/bin/sh", "-c", monitorWidget.monitorScript]
                         monitorProc.running = true
                     }
                 }
