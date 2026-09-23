@@ -16,6 +16,9 @@ font-size = 15
 # command = tmux new-session -A -s main
 shell-integration = detect
 
+# ── Each window gets its own process/renderer (prevents shared-renderer stalls) ──
+gtk-single-instance = false
+
 # ── Hide tab bar (tmux handles tabs/windows) ────────────────────────
 window-show-tab-bar = never
 
