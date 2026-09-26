@@ -39,6 +39,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import type {
   Api,
+  AssistantMessage,
   AssistantMessageEventStream,
   Context,
   Model,
@@ -190,11 +191,12 @@ function pickSummaryModel(ctx: ExtensionContext): Model<Api> | null {
   const available = ctx.modelRegistry
     .getAvailable()
     .filter(
-      (m) =>
+      (m: Model<Api>) =>
         m.input.includes("text") && ctx.modelRegistry.hasConfiguredAuth(m),
     );
   available.sort(
-    (a, b) => a.cost.input + a.cost.output - (b.cost.input + b.cost.output),
+    (a: Model<Api>, b: Model<Api>) =>
+      a.cost.input + a.cost.output - (b.cost.input + b.cost.output),
   );
   return available[0] ?? null;
 }
@@ -271,7 +273,12 @@ async function summarizeCommit(
       context,
       { maxTokens: 120, temperature: 0.2 },
     );
-    const message = await withTimeout(stream.result(), SUMMARY_TIMEOUT_MS);
+    // Cast through the stream contract; inferred-settings checking can't
+    // resolve EventStream.result()'s generic R to AssistantMessage.
+    const message = (await withTimeout(
+      stream.result(),
+      SUMMARY_TIMEOUT_MS,
+    )) as AssistantMessage;
     if (
       !message ||
       message.stopReason === "error" ||
@@ -280,8 +287,7 @@ async function summarizeCommit(
       return null;
     }
     const text = message.content
-      .filter((part) => part.type === "text")
-      .map((part) => part.text)
+      .flatMap((part) => (part.type === "text" ? [part.text] : []))
       .join(" ")
       .trim();
     if (!text) return null;
