@@ -19,4 +19,4 @@ plug "zsh-users/zsh-history-substring-search"
 plug "MichaelAquilina/zsh-you-should-use"
 plug "zap-zsh/exa"
 plug "hlissner/zsh-autopair"
-plug "MichaelAquilina/zsh-auto-notify"
+# plug "MichaelAquilina/zsh-auto-notify"  # removed 2026-10-15: too noisy, fires even when the terminal is focused (plugin has no focus detection)
