@@ -73,5 +73,9 @@ copy-on-select = clipboard
 # ── Theme: Catppuccin Mocha (built-in, no download needed) ──────────
 theme = Catppuccin Mocha
 
+# ── Disable all toasts & overlays (copy toast, resize overlay, etc.) ─
+app-notifications = false
+resize-overlay = never
+
 # ── Misc ────────────────────────────────────────────────────────────
 mouse-hide-while-typing = true
