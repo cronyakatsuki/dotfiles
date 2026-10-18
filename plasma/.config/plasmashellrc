@@ -1,3 +1,27 @@
+[Applets][1]
+activityId=fea524cb-ad82-4a3b-b202-cc18dd0c5a20
+formfactor=0
+immutability=1
+lastScreen=0
+location=0
+plugin=org.kde.bigscreen.homescreen
+wallpaperplugin=org.kde.slideshow
+
+[Applets][1][Configuration][General]
+coloredTiles=true
+wallpaperBlur=true
+
+[Applets][1][General]
+wallpaperBlur=true
+
+[Applets][1][Shortcuts]
+global=Meta+F1
+
+[Applets][1][Wallpaper][org.kde.slideshow][General]
+Image=file:///usr/share/wallpapers/cachyos-wallpapers/DarkStreaks.png
+SlideInterval=480
+SlidePaths=/usr/share/wallpapers/
+
 [Notification Messages]
 klipperClearHistoryAskAgain=false
 
