@@ -1,21 +1,32 @@
 # dotfiles
 
-Personal configuration files managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Personal configuration files managed with [GNU Stow](https://www.gnu.org/software/stow/). See [DOTFILES_CONVENTION.md](DOTFILES_CONVENTION.md) for structure and rules.
 
 ## Packages
 
 | Package | Description | Target |
 |---|---|---|
-| `alacritty` | Alacritty terminal emulator | `~/.config/alacritty/alacritty.toml` |
-| `atuin` | Shell history search | `~/.config/atuin/config.toml` |
-| `bin` | CLI scripts | `~/.local/bin/safe-edit` |
+| `atuin` | Shell history search & sync (self-hosted server) | `~/.config/atuin/config.toml` |
+| `bat` | `bat` syntax-highlighted pager (Catppuccin Mocha theme) | `~/.config/bat/` |
+| `bin` | CLI scripts (`safe-edit`, `pi-agent`) | `~/.local/bin/` |
+| `btop` | System monitor (Catppuccin Mocha theme) | `~/.config/btop/` |
+| `fastfetch` | System info tool | `~/.config/fastfetch/config.jsonc` |
+| `fd` | File finder (ignore rules) | `~/.config/fd/ignore` |
+| `ghostty` | Ghostty terminal (Monaspace font, tmux-focused, no toasts/overlays) | `~/.config/ghostty/config` |
 | `git` | Git configuration | `~/.config/git/config` |
-| `htop` | Htop configuration | `~/.config/htop/htoprc` |
+| `htop` | Process viewer | `~/.config/htop/htoprc` |
+| `lazygit` | Git TUI | `~/.config/lazygit/config.yml` |
 | `pi` | Pi agent extensions | `~/.pi/agent/extensions/` |
-| `starship` | Starship prompt | `~/.config/starship.toml` |
-| `tmux` | Tmux configuration | `~/.config/tmux/tmux.conf` |
+| `plasma` | KDE Plasma desktop layout (panel, applets) | `~/.config/plasma*` |
+| `procs` | Modern `ps` replacement | `~/.config/procs/config.toml` |
+| `ripgrep` | Search tool | `~/.config/ripgrep/rg.conf` |
+| `starship` | Shell prompt | `~/.config/starship.toml` |
+| `tmux` | Terminal multiplexer | `~/.config/tmux/tmux.conf` + theme |
 | `user-dirs` | XDG user directories | `~/.config/user-dirs.dirs` |
-| `zsh` | Zsh shell configuration | `~/.config/zsh/.zshrc` + completions |
+| `vesktop` | Vesktop (Discord) settings | `~/.config/vesktop/settings/settings.json` |
+| `yazi` | Terminal file manager (plugins, keymaps, theme) | `~/.config/yazi/` |
+| `zen` | Zen Browser custom CSS (Catppuccin Mocha) | `~/.config/zen/main/chrome/` |
+| `zsh` | Zsh shell (`conf.d/` split config + completions) | `~/.config/zsh/` |
 
 ## Usage
 
