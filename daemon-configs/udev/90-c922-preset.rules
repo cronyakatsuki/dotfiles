@@ -1,0 +1,2 @@
+# Apply the C922 look preset on any add event (boot before login + every replug).
+ACTION=="add", SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="085c", RUN+="/usr/local/sbin/c922-preset-apply $env{DEVNAME}"

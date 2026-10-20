@@ -1,0 +1,4 @@
+#!/bin/sh
+# Re-apply the C922 tuned preset — same values as the udev rule and OBS scene.
+# For a fresh WB lock (auto-measure → lock), replug the camera instead.
+exec v4l2-ctl -d /dev/video0 --set-ctrl=brightness=128,contrast=128,saturation=130,sharpness=128,white_balance_automatic=0,auto_exposure=1,exposure_time_absolute=550,exposure_dynamic_framerate=0,gain=50

@@ -1,0 +1,13 @@
+#!/bin/sh
+# Apply the C922 tuned preset at boot/replug. Same values as ~/.local/bin/webcam-preset
+# and OBS's scene file. The metadata node (video1) has no such controls; v4l2-ctl
+# errors harmlessly and we exit 0.
+dev="$1"
+if [ -z "$dev" ] || [ ! -e "$dev" ]; then exit 0; fi
+# Set fixed controls + auto WB on (let camera measure the current light)
+/usr/bin/v4l2-ctl -d "$dev" --set-ctrl=brightness=128,contrast=128,saturation=130,sharpness=128,white_balance_automatic=1,auto_exposure=1,exposure_time_absolute=550,exposure_dynamic_framerate=0,gain=50 >/dev/null 2>&1
+# Wait for auto WB to converge under the current light
+sleep 3
+# Lock WB by turning auto off
+/usr/bin/v4l2-ctl -d "$dev" --set-ctrl=white_balance_automatic=0 >/dev/null 2>&1
+exit 0

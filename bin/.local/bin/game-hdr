@@ -1,0 +1,155 @@
+#!/bin/bash
+# game-hdr — one place for the shared Steam launch chain.
+# Replaces the long per-game launch options: gamescope + HDR + ntsync
+# + the Big-Picture-Mode LD_PRELOAD fix, all defined once here.
+#
+# Steam launch options usage:
+#   game-hdr [flags] %command%
+#
+# Flags:
+#   --itm              HDR inverse tone mapping (--hdr-itm-enabled)
+#   --swapper          run the game through dlss-swapper
+#   --smooth           NVIDIA Smooth Motion (NVPRESENT_ENABLE_SMOOTH_MOTION=1)
+#   --lowlat           proton-cachyos low-latency frame pacing
+#                      (PROTON_VKD3D_LOWLATENCY=1 PROTON_DXVK_LOWLATENCY=1)
+#   --mangohud         MANGOHUD=1 plain overlay (pairs with --lite)
+#   --dll "OVERRIDES"  set WINEDLLOVERRIDES, e.g. --dll "dsound=n,b"
+#   --res WxH          internal+external resolution (default 2560x1440)
+#   --nits N           HDR SDR-content brightness nits (default 200)
+#   --no-hdr           plain gamescope: no --hdr-enabled / DXVK_HDR
+#   --no-mangoapp      no performance overlay
+#   --no-vrr           drop --adaptive-sync
+#   --lite             no gamescope at all: env + game-performance only
+#   --wd-off           append /WineDetectionEnabled:False (fixes startup deadlock
+#                      in Denuvo/Wine thread-detection on some RE Engine games,
+#                      e.g. Onimusha: Way of the Sword 2026-10-17)
+#   --dry              print the command + env that would run, then exit
+#   --help             show this help
+#
+# Everything not matching a flag is treated as the game command itself
+# (i.e. where %command% lands), so unknown game arguments pass through.
+
+RES="2560x1440"
+NITS="200"
+ITM=0; SWAPPER=0; SMOOTH=0; HDR=1; MANGO=1; VRR=1; LITE=0; DRY=0; MANGOHUD=0; WDOFF=0; LOWLAT=0
+DLLOVR=""
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--itm) ITM=1 ;;
+		--swapper) SWAPPER=1 ;;
+		--smooth) SMOOTH=1 ;;
+		--lowlat) LOWLAT=1 ;;
+		--mangohud) MANGOHUD=1 ;;
+		--dll) DLLOVR="$2"; shift ;;
+		--res) RES="$2"; shift ;;
+		--nits) NITS="$2"; shift ;;
+		--no-hdr) HDR=0 ;;
+		--no-mangoapp) MANGO=0 ;;
+		--no-vrr) VRR=0 ;;
+		--lite) LITE=1 ;;
+		--wd-off|--no-winedetect) WDOFF=1 ;;
+		--dry) DRY=1 ;;
+		--help|-h)
+			sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'
+			exit 0
+			;;
+		*)
+			break
+			;;
+	esac
+	shift
+done
+
+W="${RES%x*}"
+H="${RES#*x}"
+WDARG=""
+[ "$WDOFF" -eq 1 ] && WDARG="/WineDetectionEnabled:False"
+if ! echo "$W$H$NITS" | grep -qE '^[0-9]+$'; then
+	echo "game-hdr: --res must be WxH and --nits numeric (got: $RES / $NITS)" >&2
+	exit 1
+fi
+
+if [ "$SMOOTH" -eq 1 ]; then
+	export NVPRESENT_ENABLE_SMOOTH_MOTION=1
+fi
+# defaults for every run: proton-cachyos Discord Rich Presence bridge
+# + per-game shader cache (no-ops / harmless outside proton-cachyos)
+export PROTON_DISCORD_BRIDGE=1
+export PROTON_LOCAL_SHADER_CACHE=1
+if [ "$LOWLAT" -eq 1 ]; then
+	export PROTON_VKD3D_LOWLATENCY=1
+	export PROTON_DXVK_LOWLATENCY=1
+fi
+if [ "$HDR" -eq 1 ]; then
+	export DXVK_HDR=1
+fi
+if [ -n "$DLLOVR" ]; then
+	export WINEDLLOVERRIDES="$DLLOVR"
+fi
+if [ "$MANGOHUD" -eq 1 ]; then
+	export MANGOHUD=1
+fi
+
+WRAP="game-performance"
+if [ "$SWAPPER" -eq 1 ]; then
+	WRAP="game-performance dlss-swapper"
+fi
+
+if [ "$DRY" -eq 1 ]; then
+	echo "env:"
+	echo "  PROTON_ENABLE_NTSYNC=1"
+	echo "  PROTON_DISCORD_BRIDGE=1"
+	echo "  PROTON_LOCAL_SHADER_CACHE=1"
+	[ "$LOWLAT" -eq 1 ] && echo "  PROTON_VKD3D_LOWLATENCY=1"
+	[ "$LOWLAT" -eq 1 ] && echo "  PROTON_DXVK_LOWLATENCY=1"
+	[ "$SMOOTH" -eq 1 ] && echo "  NVPRESENT_ENABLE_SMOOTH_MOTION=1"
+	[ "$HDR" -eq 1 ] && echo "  DXVK_HDR=1"
+	[ "$MANGOHUD" -eq 1 ] && echo "  MANGOHUD=1"
+	[ -n "$DLLOVR" ] && echo "  WINEDLLOVERRIDES=$DLLOVR"
+	[ -n "$WDARG" ] && echo "  game arg: $WDARG"
+	echo "command:"
+	if [ "$LITE" -eq 1 ]; then
+		echo "  $WRAP $WDARG $*"
+	else
+		GS="gamescope -w $W -h $H -W $W -H $H -f"
+		[ "$HDR" -eq 1 ] && GS="$GS --hdr-enabled --hdr-sdr-content-nits $NITS"
+		[ "$ITM" -eq 1 ] && GS="$GS --hdr-itm-enabled"
+		[ "$MANGO" -eq 1 ] && GS="$GS --mangoapp"
+		[ "$VRR" -eq 1 ] && GS="$GS --adaptive-sync"
+		echo "  LD_PRELOAD=\"\" $GS -- env LD_PRELOAD=\"\$LD_PRELOAD\" $WRAP $WDARG $*"
+	fi
+	exit 0
+fi
+
+# --lite: no gamescope at all
+if [ "$LITE" -eq 1 ]; then
+	if [ "$SWAPPER" -eq 1 ]; then
+		exec game-performance dlss-swapper "$@" $WDARG
+	else
+		exec game-performance "$@" $WDARG
+	fi
+fi
+
+# full chain, byte-faithful to the proven launch options:
+# LD_PRELOAD cleared for gamescope itself (Big Picture Mode fix),
+# then re-applied to the game via env after gamescope's '--'
+GS="gamescope -w $W -h $H -W $W -H $H -f"
+if [ "$HDR" -eq 1 ]; then
+	GS="$GS --hdr-enabled --hdr-sdr-content-nits $NITS"
+fi
+if [ "$ITM" -eq 1 ]; then
+	GS="$GS --hdr-itm-enabled"
+fi
+if [ "$MANGO" -eq 1 ]; then
+	GS="$GS --mangoapp"
+fi
+if [ "$VRR" -eq 1 ]; then
+	GS="$GS --adaptive-sync"
+fi
+if [ "$SWAPPER" -eq 1 ]; then
+	WRAP="game-performance dlss-swapper"
+else
+	WRAP="game-performance"
+fi
+exec sh -c "LD_PRELOAD=\"\" $GS -- env LD_PRELOAD=\"\$LD_PRELOAD\" $WRAP \"\$@\"" game-hdr "$@" $WDARG
