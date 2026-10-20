@@ -91,9 +91,19 @@ if [ "$MANGOHUD" -eq 1 ]; then
 	export MANGOHUD=1
 fi
 
-WRAP="game-performance"
+# Performance-profile wrapper (CachyOS's game-performance; portable — only needs
+# power-profiles-daemon or TLP). Used only when present, so the script works
+# unchanged on distros that don't ship it (e.g. aerynOS).
+WRAP=""
+if command -v game-performance >/dev/null 2>&1; then
+	WRAP="game-performance"
+fi
 if [ "$SWAPPER" -eq 1 ]; then
-	WRAP="game-performance dlss-swapper"
+	if [ -n "$WRAP" ]; then
+		WRAP="$WRAP dlss-swapper"
+	else
+		WRAP="dlss-swapper"
+	fi
 fi
 
 if [ "$DRY" -eq 1 ]; then
@@ -110,7 +120,7 @@ if [ "$DRY" -eq 1 ]; then
 	[ -n "$WDARG" ] && echo "  game arg: $WDARG"
 	echo "command:"
 	if [ "$LITE" -eq 1 ]; then
-		echo "  $WRAP $WDARG $*"
+		echo "  ${WRAP:+$WRAP }$WDARG $*"
 	else
 		GS="gamescope -w $W -h $H -W $W -H $H -f"
 		[ "$HDR" -eq 1 ] && GS="$GS --hdr-enabled --hdr-sdr-content-nits $NITS"
