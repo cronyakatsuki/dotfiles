@@ -1,0 +1,262 @@
+# This is the CoolerControl configuration file.
+# Comments and most formatting is preserved.
+# Most of this file you can edit by hand, but it is recommended to stop the daemon when doing so.
+# -------------------------------
+
+
+# Unique ID Device List
+# -------------------------------
+# This is a simple UID and device name key-value pair, that is automatically generated at startup
+#  to help humans distinguish which UID belongs to which device in this config file.
+#  Only the device name is given here, complete Device information can be requested from the API.
+#  UIDs are generated sha256 hashes based on specific criteria to help determine device uniqueness.
+# ANY CHANGES WILL BE OVERWRITTEN.
+# Example:
+# 21091c4fb341ceab6236e8c9e905ccc263a4ac08134b036ed415925ba4c1645d = "Nvidia GPU"
+[devices]
+19e098e312e1b1b39163a343ea22b6ea17f18ec1a803ffe0ce44f5bacd6076ee = "Custom Sensors"
+18517aee779eda4778fc7b5432bc39dff7d75c1a3a418c80a52457d40a4a9b90 = "nct6798"
+3b0efa9d559f75cfaad972e6c92c7f3f3fcfca8aa3c1189c1e0c01cb3fc31827 = "Intel(R) Core(TM) i5-14400F"
+e5345c5f8c89c9f9ed54a078d1e2ec7c2d3c7248299ac16a93dff7d8bb046efd = "NVIDIA GeForce RTX 5060 Ti"
+ba08fa1492a4601d165708b57458095186d4b8f851cc08eedfaa97317f894a97 = "r8169_0_400:00"
+151cb706e6eb7cd7ad8e79cb17b33644977d8392ebca1f6db1e3ff9752577592 = "nvme"
+f21957a0a45ae9ad1a97d64e53945bf66b53a48f607f99c89aab2695d7b084ce = "Intel(R) Core(TM) i5-14600KF"
+
+
+# Legacy690 Option for devices
+# -------------------------------
+# There are 2 Asetek 690LC liquid coolers that have the same device ID.
+#  To tell them apart we need user input to know which cooler we're actually dealing with.
+#  This is an assignment of liquidctl AseTek690LC device UIDs to true/false:
+#   true = Legacy690 Cooler aka NZXT Kraken X40, X60, X31, X41, X51 and X61
+#   false = Modern690 Cooler aka EVGA CLC 120 (CLC12), 240, 280 and 360
+# Example:
+# 21091c4fb341ceab6236e8c9e905ccc263a4ac08134b036ed415925ba4c1645d = true
+[legacy690]
+
+
+# Device Settings
+# -------------------------------
+# This is where CoolerControl will save device settings for the cooresponding device.
+# Settings can be set here also specifically by hand. (restart required for applying)
+# These settings are applied on startup and each is overwritten once a new setting
+# has been applied.
+# Example:
+# [device-settings.4b9cd1bc5fb2921253e6b7dd5b1b011086ea529d915a86b3560c236084452807]
+# pump = { speed_fixed = 30 }
+# logo = { lighting = { mode = "fixed", colors = [[0, 255, 255]] } }
+# ring = { lighting = { mode = "spectrum-wave", backward = true, colors = [] } }
+[device-settings]
+
+[device-settings.18517aee779eda4778fc7b5432bc39dff7d75c1a3a418c80a52457d40a4a9b90]
+fan5 = { profile_uid = "a6567225-f919-4237-9069-ac8e013d9f8a" }
+fan2 = { profile_uid = "023b8eff-8652-4b99-98d4-2016b80c9871" }
+
+
+# A list of profiles to be used with each device's settings
+# -------------------------------
+[[profiles]]
+uid = "0"
+name = "Unmanaged"
+p_type = "Default"
+function = "0"
+
+[[profiles]]
+uid = "e90eafd7-f54f-4ce9-bf53-489c7248f19b"
+name = "Chassis Gpu"
+p_type = "Graph"
+speed_profile = [[30.0, 35], [39.0, 40], [45.0, 50], [48.0, 60], [51.0, 70], [54.0, 79], [57.0, 89], [60.0, 100]]
+temp_source = { temp_name = "GPU Temp", device_uid = "e5345c5f8c89c9f9ed54a078d1e2ec7c2d3c7248299ac16a93dff7d8bb046efd" }
+temp_min = 30.0
+temp_max = 60.0
+function_uid = "0"
+offset_profile = []
+
+[[profiles]]
+uid = "1900552f-7ad2-4a23-9212-e79fdd65f514"
+name = "Chassis Cpu"
+p_type = "Graph"
+speed_profile = [[20.0, 30], [30.0, 40], [40.1, 60], [50.1, 80], [60.0, 100]]
+temp_source = { temp_name = "temp1", device_uid = "f21957a0a45ae9ad1a97d64e53945bf66b53a48f607f99c89aab2695d7b084ce" }
+temp_min = 20.0
+temp_max = 60.0
+function_uid = "0"
+offset_profile = []
+
+[[profiles]]
+uid = "a6567225-f919-4237-9069-ac8e013d9f8a"
+name = "Chassis"
+p_type = "Mix"
+speed_profile = []
+function_uid = "0"
+member_profile_uids = ["e90eafd7-f54f-4ce9-bf53-489c7248f19b", "1900552f-7ad2-4a23-9212-e79fdd65f514"]
+mix_function_type = "Max"
+offset_profile = []
+
+[[profiles]]
+uid = "023b8eff-8652-4b99-98d4-2016b80c9871"
+name = "AIO Cpu"
+p_type = "Graph"
+speed_profile = [[30.0, 45], [45.0, 50], [60.0, 65], [75.0, 80], [90.0, 100]]
+temp_source = { temp_name = "temp1", device_uid = "f21957a0a45ae9ad1a97d64e53945bf66b53a48f607f99c89aab2695d7b084ce" }
+temp_min = 30.0
+temp_max = 90.0
+function_uid = "5f146262-7d35-4f20-bfe7-cc05fb67ab90"
+offset_profile = []
+
+# A list of functions to be applied to the various profiles
+# -------------------------------
+[[functions]]
+uid = "0"
+name = "Default Function"
+f_type = "Identity"
+
+[[functions]]
+uid = "5f146262-7d35-4f20-bfe7-cc05fb67ab90"
+name = "AIO Cpu"
+f_type = "Standard"
+duty_minimum = 2
+duty_maximum = 100
+step_size_min_decreasing = 0
+step_size_max_decreasing = 0
+response_delay = 4
+deviance = 5.0
+only_downward = true
+threshold_hopping = true
+bypass_min_at_extremes = false
+
+
+# Cooler Control Settings
+# -------------------------------
+# This is where CoolerControl specifc general and specifc device settings are set. These device
+# settings differ from the above Device Settings, in that they are applied to CoolerControl,
+# and not on the devices themselves. For ex. settings such as disabling/enabling a particular device.
+[settings]
+
+# whether to apply the saved device settings on daemon startup
+apply_on_boot = true
+
+# Whether to enable the integration with liquidctl.
+# Disabling this will prevent any communication with liquidctl,
+# and all HWMon supported devices will be shown.
+liquidctl_integration = true
+
+# There are some devices that are supported both by liquidctl and hwmon drivers. Normally the
+# preference is to use liquidctl as it supports more features such as RGB control. There are
+# some cases where the hwmon driver is preferred though. Note: Care should be taken to blacklist
+# one of the devices to avoid needlessly loading the device IO and avoid concurrency issues.
+# Use at your own risk.
+hide_duplicate_devices = true
+
+# Will skip initialization calls for liquidctl devices. ONLY USE if you are doing initialiation manually.
+no_init = false
+
+# Startup Delay (seconds) is an integer value between 0 and 10
+startup_delay = 2
+
+# For ThinkPads, wheather to use the 'full-speed' option when settings the fan to 100%
+# This option drives the fan as fast as it can go, which might exceed hardware limits,
+# so use this level with caution.
+thinkpad_full_speed = false
+
+# API Address and Port:
+# The daemon by default uses port 11987 and the standard loopback IPv4 and IPv6 addresses.
+# You can set an IPv4, IPv6 or both addresses to listen on. An empty string will disable the address.
+# It is highly recommended to use the default settings unless you have a specific reason to change them
+# and understand the implications.
+# If you expose the API to a public network, it is recommended to use TLS/HTTPS (see below).
+# For more information see the project wiki.
+# Example:
+# port = 11987
+# ipv4_address = "127.0.0.1"
+# ipv6_address = "::1"
+
+# Whether to compress the response payload from the API. This will reduce the size of the response
+# but will increase CPU usage a tiny bit. This is useful if you are running the API over a network.
+# 'compress' is deprecated, use compress_payload instead.
+compress_payload = true
+
+# The polling rate for sensor data collection. The default is 1.0 second. Limited to values
+# between 0.5 and 5.0 seconds in half-second increments.
+# Note: Caution should be used when using values less than 1.0.
+# poll_rate = 1.0
+
+# Whether to check if drivetemp supported drives are in a suspended state/spun down, and if so,
+# return 0C as their reporting temperature.
+drivetemp_suspend = false
+
+[settings.3b0efa9d559f75cfaad972e6c92c7f3f3fcfca8aa3c1189c1e0c01cb3fc31827]
+name = "Intel(R) Core(TM) i5-14400F"
+disable = false
+
+[settings.3b0efa9d559f75cfaad972e6c92c7f3f3fcfca8aa3c1189c1e0c01cb3fc31827.channel_settings]
+
+[settings.e5345c5f8c89c9f9ed54a078d1e2ec7c2d3c7248299ac16a93dff7d8bb046efd]
+name = "NVIDIA GeForce RTX 5060 Ti"
+disable = false
+
+[settings.e5345c5f8c89c9f9ed54a078d1e2ec7c2d3c7248299ac16a93dff7d8bb046efd.channel_settings]
+
+[settings.18517aee779eda4778fc7b5432bc39dff7d75c1a3a418c80a52457d40a4a9b90]
+name = "nct6798"
+disable = false
+
+[settings.18517aee779eda4778fc7b5432bc39dff7d75c1a3a418c80a52457d40a4a9b90.channel_settings]
+fan6 = { label = "Fan6", disabled = true }
+fan7 = { label = "Fan7", disabled = true }
+fan3 = { label = "Fan3", disabled = true }
+fan1 = { label = "Fan1", disabled = true }
+fan4 = { label = "Fan4", disabled = true }
+
+[settings.151cb706e6eb7cd7ad8e79cb17b33644977d8392ebca1f6db1e3ff9752577592]
+name = "WD Green SN3000 1TB"
+disable = true
+
+[settings.151cb706e6eb7cd7ad8e79cb17b33644977d8392ebca1f6db1e3ff9752577592.channel_settings]
+
+[settings.ba08fa1492a4601d165708b57458095186d4b8f851cc08eedfaa97317f894a97]
+name = "r8169_0_400:00"
+disable = true
+
+[settings.ba08fa1492a4601d165708b57458095186d4b8f851cc08eedfaa97317f894a97.channel_settings]
+
+# TLS/HTTPS Configuration:
+# TLS to secure the REST API with HTTPS. (enabled by default)
+# When enabled, a self-signed certificate will be automatically generated on first startup if no
+# certificate paths are specified. The certificate and key are stored in /etc/coolercontrol/ by
+# default.
+# Note: Self-signed certificates will cause browser warnings. You can provide your own
+# certificate by specifying the paths below, or use a reverse proxy (nginx, caddy, traefik)
+# to handle TLS termination as an alternative approach.
+# tls_enabled = true
+# tls_cert_path = "/etc/coolercontrol/coolercontrol.crt"
+# tls_key_path = "/etc/coolercontrol/coolercontrol.key"
+
+# Reverse Proxy / CORS Configuration:
+# Custom origins to allow in CORS requests. This is useful when accessing CoolerControl through
+# a reverse proxy with a custom domain, or via port forwarding with a public IP. Add the full
+# origin URL (scheme + host + port if non-standard).
+# origins = ["https://coolercontrol.mydomain.com", "http://192.168.1.1:8080"]
+
+# Header to check for the client's original protocol when behind a reverse proxy. Common values
+# are "X-Forwarded-Proto" (nginx, Apache) or "X-Scheme". When this header indicates "https",
+# the HTTP-to-HTTPS redirect is skipped (the proxy handles TLS termination).
+# protocol_header = "X-Forwarded-Proto"
+
+# Allow unencrypted HTTP connections from non-localhost addresses. By default, non-localhost
+# HTTP requests are redirected to HTTPS when TLS is enabled. Set this to true to allow HTTP.
+# Note: This should only be used as a last resort and is not recommended.
+# allow_unencrypted = false
+
+# Whether to auto-detect Super-I/O hardware sensors and load the appropriate kernel
+# modules at startup. This helps ensure all hwmon chips are available. (x86_64 only)
+# sensors_auto_detect = true
+
+# Whether to listen for kernel device add/remove events (e.g. USB hotplug) at startup.
+# When enabled, the daemon watches for hardware changes and notifies connected clients.
+# Disable this in containers or environments without netlink socket access.
+# device_listener_enabled = true
+
+# CoolerControl Device settings Example:
+# [settings.4b9cd1bc5fb2921253e6b7dd5b1b011086ea529d915a86b3560c236084452807]
+# disabled = true

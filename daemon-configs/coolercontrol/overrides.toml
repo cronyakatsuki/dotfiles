@@ -1,0 +1,9 @@
+# CoolerControl display-name overrides.
+# Managed by coolercontrold: comments are not preserved on rewrite.
+# Hand edits are applied at the next daemon startup.
+
+[devices.18517aee779eda4778fc7b5432bc39dff7d75c1a3a418c80a52457d40a4a9b90]
+
+[devices.18517aee779eda4778fc7b5432bc39dff7d75c1a3a418c80a52457d40a4a9b90.channels]
+fan2 = { label = "Cpu" }
+fan5 = { label = "Chassis" }
