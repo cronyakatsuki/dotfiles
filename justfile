@@ -7,7 +7,7 @@ sync-daemon-configs:
     cp /etc/lact/config.yaml daemon-configs/lact/
     cp /etc/coolercontrol/{config.toml,config-ui.json,modes.json,alerts.json,overrides.toml,calibrations.json} daemon-configs/coolercontrol/
     cp /etc/nix/nix.conf daemon-configs/nix/
-    cp /etc/udev/rules.d/90-c922-preset.rules daemon-configs/udev/
+    cp /etc/udev/rules.d/90-c922-preset.rules /etc/udev/rules.d/99-intel-rapl.rules /etc/udev/rules.d/99-silakka54-no-joystick.rules daemon-configs/udev/
     cp /usr/local/sbin/c922-preset-apply daemon-configs/sbin/
 
 # restore /etc daemon configs after a fresh distro install (needs sudo to write /etc)
@@ -17,6 +17,8 @@ restore-daemon-configs:
     sudo mkdir -p /etc/nix
     sudo cp daemon-configs/nix/nix.conf /etc/nix/
     sudo cp daemon-configs/udev/90-c922-preset.rules /etc/udev/rules.d/
+    sudo cp daemon-configs/udev/99-intel-rapl.rules /etc/udev/rules.d/
+    sudo cp daemon-configs/udev/99-silakka54-no-joystick.rules /etc/udev/rules.d/
     sudo cp daemon-configs/sbin/c922-preset-apply /usr/local/sbin/
     sudo chmod +x /usr/local/sbin/c922-preset-apply
     sudo udevadm control --reload
