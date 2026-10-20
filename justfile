@@ -3,14 +3,17 @@ default:
 
 # snapshot /etc daemon configs into the repo (safe to run anytime)
 sync-daemon-configs:
-    mkdir -p daemon-configs/lact daemon-configs/coolercontrol
+    mkdir -p daemon-configs/lact daemon-configs/coolercontrol daemon-configs/nix
     cp /etc/lact/config.yaml daemon-configs/lact/
     cp /etc/coolercontrol/{config.toml,config-ui.json,modes.json,alerts.json,overrides.toml,calibrations.json} daemon-configs/coolercontrol/
+    cp /etc/nix/nix.conf daemon-configs/nix/
 
 # restore /etc daemon configs after a fresh distro install (needs sudo to write /etc)
 restore-daemon-configs:
     sudo cp daemon-configs/lact/config.yaml /etc/lact/
     sudo cp daemon-configs/coolercontrol/{config.toml,config-ui.json,modes.json,alerts.json,overrides.toml,calibrations.json} /etc/coolercontrol/
+    sudo mkdir -p /etc/nix
+    sudo cp daemon-configs/nix/nix.conf /etc/nix/
     sudo systemctl restart lactd coolercontrold
 
 # reinstall all pi agent extensions (package list lives in ~/.pi/agent/settings.json)
