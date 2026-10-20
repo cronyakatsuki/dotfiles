@@ -134,10 +134,10 @@ fi
 
 # --lite: no gamescope at all
 if [ "$LITE" -eq 1 ]; then
-	if [ "$SWAPPER" -eq 1 ]; then
-		exec game-performance dlss-swapper "$@" $WDARG
+	if [ -n "$WRAP" ]; then
+		exec $WRAP "$@" $WDARG
 	else
-		exec game-performance "$@" $WDARG
+		exec "$@" $WDARG
 	fi
 fi
 
@@ -157,9 +157,5 @@ fi
 if [ "$VRR" -eq 1 ]; then
 	GS="$GS --adaptive-sync"
 fi
-if [ "$SWAPPER" -eq 1 ]; then
-	WRAP="game-performance dlss-swapper"
-else
-	WRAP="game-performance"
-fi
+exec sh -c "LD_PRELOAD=\"\" $GS -- env LD_PRELOAD=\"\$LD_PRELOAD\" $WRAP \"\$@\"" game-hdr "$@" $WDARG
 exec sh -c "LD_PRELOAD=\"\" $GS -- env LD_PRELOAD=\"\$LD_PRELOAD\" $WRAP \"\$@\"" game-hdr "$@" $WDARG
