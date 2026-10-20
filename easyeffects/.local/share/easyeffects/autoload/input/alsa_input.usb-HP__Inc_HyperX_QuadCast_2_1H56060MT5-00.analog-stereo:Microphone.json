@@ -1,0 +1,6 @@
+{
+    "device": "alsa_input.usb-HP__Inc_HyperX_QuadCast_2_1H56060MT5-00.analog-stereo",
+    "device-description": "HyperX QuadCast 2 Analog Stereo",
+    "device-profile": "Microphone",
+    "preset-name": "EasyEffects Microphone Preset: Masc NPR Voice + Noise Reduction"
+}
