@@ -158,4 +158,3 @@ if [ "$VRR" -eq 1 ]; then
 	GS="$GS --adaptive-sync"
 fi
 exec sh -c "LD_PRELOAD=\"\" $GS -- env LD_PRELOAD=\"\$LD_PRELOAD\" $WRAP \"\$@\"" game-hdr "$@" $WDARG
-exec sh -c "LD_PRELOAD=\"\" $GS -- env LD_PRELOAD=\"\$LD_PRELOAD\" $WRAP \"\$@\"" game-hdr "$@" $WDARG
