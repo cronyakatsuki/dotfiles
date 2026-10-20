@@ -3,10 +3,12 @@ default:
 
 # snapshot /etc daemon configs into the repo (safe to run anytime)
 sync-daemon-configs:
-    mkdir -p daemon-configs/lact daemon-configs/coolercontrol daemon-configs/nix
+    mkdir -p daemon-configs/lact daemon-configs/coolercontrol daemon-configs/nix daemon-configs/udev daemon-configs/sbin
     cp /etc/lact/config.yaml daemon-configs/lact/
     cp /etc/coolercontrol/{config.toml,config-ui.json,modes.json,alerts.json,overrides.toml,calibrations.json} daemon-configs/coolercontrol/
     cp /etc/nix/nix.conf daemon-configs/nix/
+    cp /etc/udev/rules.d/90-c922-preset.rules daemon-configs/udev/
+    cp /usr/local/sbin/c922-preset-apply daemon-configs/sbin/
 
 # restore /etc daemon configs after a fresh distro install (needs sudo to write /etc)
 restore-daemon-configs:
@@ -14,6 +16,10 @@ restore-daemon-configs:
     sudo cp daemon-configs/coolercontrol/{config.toml,config-ui.json,modes.json,alerts.json,overrides.toml,calibrations.json} /etc/coolercontrol/
     sudo mkdir -p /etc/nix
     sudo cp daemon-configs/nix/nix.conf /etc/nix/
+    sudo cp daemon-configs/udev/90-c922-preset.rules /etc/udev/rules.d/
+    sudo cp daemon-configs/sbin/c922-preset-apply /usr/local/sbin/
+    sudo chmod +x /usr/local/sbin/c922-preset-apply
+    sudo udevadm control --reload
     sudo systemctl restart lactd coolercontrold
 
 # reinstall all pi agent extensions (package list lives in ~/.pi/agent/settings.json)
