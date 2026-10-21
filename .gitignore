@@ -17,4 +17,12 @@ zsh/**/.zcompdump
 zsh/**/.zcompdump-*
 zsh/**/.zsh_history
 zsh/**/.zcompcache/
+
+# Yazi external plugins (installed via `ya pkg install`, pinned in package.toml).
+# Only user's own folder-rules.yazi is committed.
+yazi/.config/yazi/plugins/*
+!yazi/.config/yazi/plugins/folder-rules.yazi
+
+# Tmux TPM plugins (installed via prefix+I, declared in tmux.conf)
+tmux/.config/tmux/plugins/
 /atuin/
