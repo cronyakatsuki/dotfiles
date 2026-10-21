@@ -13,7 +13,8 @@
 .config/secrets.env
 
 # Local state (not synced)
-/zsh/.zcompdump
-/zsh/.zcompcache/
-/zsh/.zsh_history
+zsh/**/.zcompdump
+zsh/**/.zcompdump-*
+zsh/**/.zsh_history
+zsh/**/.zcompcache/
 /atuin/
