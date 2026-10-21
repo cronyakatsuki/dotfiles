@@ -39,7 +39,7 @@ restore-daemon-configs:
 # Edit css in the repo, then run: just sync-zen-chrome
 sync-zen-chrome:
     for f in userChrome.css userContent.css zen-logo-mocha.svg; do \
-        cp $HOME/dotfiles/zen/.var/app/app.zen_browser.zen/.zen/main/chrome/$f \
+        cp $HOME/dotfiles/zen/.config/zen/main/chrome/$f \
            $HOME/.var/app/app.zen_browser.zen/.zen/main/chrome/$f; \
     done
 
