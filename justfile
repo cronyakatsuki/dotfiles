@@ -37,6 +37,3 @@ pi-extensions:
     pi install npm:pi-catppuccin
     pi install npm:pi-lens
     pi install npm:@0xkahi/pi-vim-keys
-    # NOTE: the two pi-agent-extensions exclusions (powerline-footer, cwd-history)
-    # live only in ~/.pi/agent/settings.json — restore that file (or re-add the
-    # "!extensions/..." entries) or those extensions will come back on reinstall.

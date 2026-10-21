@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # game-hdr — one place for the shared Steam launch chain.
 # Replaces the long per-game launch options: gamescope + HDR + ntsync
 # + the Big-Picture-Mode LD_PRELOAD fix, all defined once here.
