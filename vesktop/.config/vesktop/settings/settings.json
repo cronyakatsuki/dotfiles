@@ -2,9 +2,13 @@
     "autoUpdate": true,
     "autoUpdateNotification": true,
     "useQuickCss": true,
-    "themeLinks": [],
+    "themeLinks": [
+        "https://catppuccin.github.io/discord/dist/catppuccin-mocha.theme.css"
+    ],
     "eagerPatches": false,
-    "enabledThemes": [],
+    "enabledThemes": [
+        "https://catppuccin.github.io/discord/dist/catppuccin-mocha.theme.css"
+    ],
     "enableReactDevtools": false,
     "frameless": false,
     "transparent": false,
