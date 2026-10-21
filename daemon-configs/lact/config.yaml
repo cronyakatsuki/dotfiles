@@ -1,7 +1,7 @@
 version: 7
 daemon:
   log_level: info
-  admin_group: wheel
+  admin_group: sudo
   disable_clocks_cleanup: false
 apply_settings_timer: 5
 gpus:
