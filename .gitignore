@@ -25,4 +25,7 @@ yazi/.config/yazi/plugins/*
 
 # Tmux TPM plugins (installed via prefix+I, declared in tmux.conf)
 tmux/.config/tmux/plugins/
+
+# Vesktop vencord quick-css scratch file (empty unless user edits it in vencord UI)
+vesktop/.config/vesktop/settings/quickCss.css
 /atuin/
