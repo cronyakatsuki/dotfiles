@@ -2,16 +2,16 @@
     "autoUpdate": true,
     "autoUpdateNotification": true,
     "useQuickCss": true,
-    "themeLinks": ["https://catppuccin.github.io/discord/dist/catppuccin-mocha.theme.css"],
+    "themeLinks": [],
     "eagerPatches": false,
-    "enabledThemes": ["https://catppuccin.github.io/discord/dist/catppuccin-mocha.theme.css"],
+    "enabledThemes": [],
     "enableReactDevtools": false,
     "frameless": false,
     "transparent": false,
     "winCtrlQ": false,
     "windowsMaterial": "none",
     "disableMinSize": false,
-    "winNativeTitleBar": false,
+    "nativeTitleBar": false,
     "plugins": {
         "ChatInputButtonAPI": {
             "enabled": false
@@ -49,6 +49,9 @@
         "AccountPanelServerProfile": {
             "enabled": false
         },
+        "AddAttachments": {
+            "enabled": false
+        },
         "AlwaysAnimate": {
             "enabled": false
         },
@@ -59,9 +62,6 @@
             "enabled": false
         },
         "AnonymiseFileNames": {
-            "enabled": false
-        },
-        "AppleMusicRichPresence": {
             "enabled": false
         },
         "WebRichPresence (arRPC)": {
@@ -148,6 +148,9 @@
         "Decor": {
             "enabled": false
         },
+        "DirectFileDownload": {
+            "enabled": false
+        },
         "DisableCallIdle": {
             "enabled": false
         },
@@ -172,9 +175,6 @@
         "FavoriteEmojiFirst": {
             "enabled": false
         },
-        "FavoriteGifSearch": {
-            "enabled": false
-        },
         "FixCodeblockGap": {
             "enabled": false
         },
@@ -193,9 +193,6 @@
         "FriendInvites": {
             "enabled": false
         },
-        "FriendsSince": {
-            "enabled": false
-        },
         "FullSearchContext": {
             "enabled": false
         },
@@ -206,6 +203,9 @@
             "enabled": false
         },
         "GifPaste": {
+            "enabled": false
+        },
+        "GifProviderSwitcher": {
             "enabled": false
         },
         "GreetStickerPicker": {
@@ -260,6 +260,9 @@
             "enabled": false
         },
         "MoreQuickReactions": {
+            "enabled": false
+        },
+        "MusicRichPresence": {
             "enabled": false
         },
         "MutualGroupDMs": {
@@ -383,9 +386,6 @@
             "enabled": false
         },
         "SecretRingToneEnabler": {
-            "enabled": false
-        },
-        "Summaries": {
             "enabled": false
         },
         "SendTimestamps": {
@@ -528,9 +528,6 @@
         },
         "BadgeAPI": {
             "enabled": true
-        },
-        "MusicRichPresence": {
-            "enabled": false
         }
     },
     "uiElements": {
@@ -547,6 +544,6 @@
         "authenticated": false,
         "url": "https://api.vencord.dev/",
         "settingsSync": false,
-        "settingsSyncVersion": 1784535764773
+        "settingsSyncVersion": 1792598940887
     }
 }
