@@ -1,11 +1,14 @@
 default:
     @just --list
 
-# snapshot /etc daemon configs into the repo (safe to run anytime)
+# NOTE: recipes must be dash-compatible (PikaOS sh=dash) — no bash brace expansion
+# snapshot /etc daemon configs into the repo (safe to run anytime; missing files skipped)
 sync-daemon-configs:
     mkdir -p daemon-configs/lact daemon-configs/coolercontrol daemon-configs/nix daemon-configs/udev daemon-configs/sbin
     cp /etc/lact/config.yaml daemon-configs/lact/
-    cp /etc/coolercontrol/{config.toml,config-ui.json,modes.json,alerts.json,overrides.toml,calibrations.json} daemon-configs/coolercontrol/
+    for f in config.toml config-ui.json modes.json alerts.json overrides.toml calibrations.json; do \
+        cp /etc/coolercontrol/$f daemon-configs/coolercontrol/ 2>/dev/null || echo "skip missing /etc/coolercontrol/$f"; \
+    done
     cp /etc/nix/nix.conf daemon-configs/nix/
     cp /etc/udev/rules.d/90-c922-preset.rules /etc/udev/rules.d/99-intel-rapl.rules /etc/udev/rules.d/99-silakka54-no-joystick.rules daemon-configs/udev/
     cp /usr/local/sbin/c922-preset-apply daemon-configs/sbin/
@@ -17,7 +20,9 @@ restore-daemon-configs:
     sudo systemctl stop coolercontrold lactd || true
     sudo mkdir -p /etc/lact /etc/coolercontrol
     sudo cp daemon-configs/lact/config.yaml /etc/lact/
-    sudo cp daemon-configs/coolercontrol/{config.toml,config-ui.json,modes.json,alerts.json,overrides.toml,calibrations.json} /etc/coolercontrol/
+    for f in config.toml config-ui.json modes.json alerts.json overrides.toml calibrations.json; do \
+        sudo cp daemon-configs/coolercontrol/$f /etc/coolercontrol/; \
+    done
     sudo mkdir -p /etc/nix
     sudo cp daemon-configs/nix/nix.conf /etc/nix/
     sudo cp daemon-configs/udev/90-c922-preset.rules /etc/udev/rules.d/
