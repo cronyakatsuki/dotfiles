@@ -1,6 +1,9 @@
+catppuccin-cursors-mocha
 catppuccin-gtk-theme-mocha
+kvantum-theme-catppuccin-git
 kwin-scripts-krohnkite-git
 neovim-symlinks
+papirus-folders-catppuccin-git
 pi-bin
 plasma6-applets-panel-colorizer
 plasma6-applets-virtual-desktop-bar-wayland

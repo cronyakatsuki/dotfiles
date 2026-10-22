@@ -28,6 +28,7 @@ cachyos-v3-mirrorlist
 cachyos-v4-mirrorlist
 cachyos-wallpapers
 cantarell-fonts
+catppuccin-cursors-mocha
 catppuccin-gtk-theme-mocha
 char-white
 coolercontrol
@@ -57,6 +58,7 @@ intel-ucode
 just
 kde-gtk-config
 kdeplasma-addons
+kvantum-theme-catppuccin-git
 kwin-effect-rounded-corners
 kwin-scripts-krohnkite-git
 lact
@@ -81,6 +83,7 @@ nix
 nvtop
 opentabletdriver
 os-prober
+papirus-folders-catppuccin-git
 partitionmanager
 pi-bin
 plasma-browser-integration
