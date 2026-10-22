@@ -53,6 +53,7 @@ vulkan-headers
 ffmpeg
 ffmpegthumbnailer
 7zip
+wl-clipboard
 ttf-monaspace-frozen
 ttf-nerd-fonts-symbols-mono
 pipewire
