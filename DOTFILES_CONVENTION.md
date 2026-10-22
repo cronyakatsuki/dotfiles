@@ -19,7 +19,7 @@ Each config is an **independent Stow package** at the top level of this repo.
 
 ## Package Rules
 1. **One package = one config.** Each directory is a self-contained stow package.
-   - Exception: `daemon-configs/` is NOT a stow package — it holds root-owned `/etc` files (lact, coolercontrol) synced via `just sync-daemon-configs` / restored via `just restore-daemon-configs`. Don't `stow` it.
+   - Exception: `daemon-configs/` and `system/` are NOT stow packages — they hold root-owned `/etc` files (lact, coolercontrol) synced via `just sync-daemon-configs` / restored via `just restore-daemon-configs`, and package lists. Both are listed in the root `.stow-local-ignore`, so `stow */` and `stow daemon-configs` are safe no-ops. Don't `stow` them.
 2. **Full path from $HOME.** Files inside a package mirror their target location relative to `~`.
    - Example: `tmux/.config/tmux/tmux.conf` → `~/.config/tmux/tmux.conf`
 3. **Install all:** `stow */` from `~/dotfiles`
