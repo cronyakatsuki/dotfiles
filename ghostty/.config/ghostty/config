@@ -23,7 +23,7 @@ gtk-single-instance = false
 window-show-tab-bar = never
 
 # ── Remove titlebar & borders for clean minimal look ────────────────
-window-decoration = none
+# window-decoration = none
 
 # ── Don't confirm when closing (tmux handles persistence) ───────────
 confirm-close-surface = false
