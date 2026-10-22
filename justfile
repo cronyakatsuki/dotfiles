@@ -1,6 +1,16 @@
 default:
     @just --list
 
+# stow every real package; skips repo-data dirs (daemon-configs, system).
+# NOTE: `stow */` is NOT safe here — the shell expands the glob, so stow gets
+# explicit args and stows even non-package data dirs (.stow-local-ignore at the
+# repo root is never read; stow only reads it from inside a package dir).
+stow-all:
+    for d in */; do \
+        case "$d" in daemon-configs/|system/) continue ;; esac; \
+        stow --restow "$d"; \
+    done
+
 # NOTE: recipes must be dash-compatible (PikaOS sh=dash) — no bash brace expansion
 # snapshot /etc daemon configs into the repo (safe to run anytime; missing files skipped)
 sync-daemon-configs:

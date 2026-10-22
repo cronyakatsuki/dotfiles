@@ -1,4 +1,6 @@
-# Packages in this repo that are NOT stow packages (plain `stow */` skips them).
-# They hold repo data only — never link their contents into $HOME.
+# NOTE: this file has NO effect on stow — stow only reads .stow-local-ignore
+# from inside a package dir, never from the repo root, and `stow */` is expanded
+# by the shell before stow runs. Kept only as documentation of which dirs are
+# repo data, not packages. Exclusion is enforced by `just stow-all`.
 daemon-configs
 system
