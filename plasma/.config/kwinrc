@@ -1,14 +1,14 @@
 [Desktops]
-Id_1=00ce176b-05f8-4f99-80ce-4732c5ea12dd
-Id_2=1e07e9c6-a1ae-4be4-b16c-9653802d4c67
-Id_3=d4a3fc7b-7ffe-4144-8688-47f3cc5bd570
-Id_4=9be581b5-09d4-495e-9c26-ce74b466e5c0
-Id_5=d4becb54-b5bc-485c-aa7d-de7dba51394b
+Id_1=8abb343d-58da-492b-b8e0-6def6c59d92f
+Id_2=91ce00b4-9b69-439f-ba05-780e7e36da5f
+Id_3=4b122c9d-d18e-4a9e-84ad-5b1507f4f255
+Id_4=56a0d8c1-c16e-4635-a710-d957087b1020
+Id_5=b04069a5-1c9a-4923-8457-b19ef5d676c7
 Name_1=Browser
 Name_2=Terminal
-Name_3=Communication
+Name_3=Community
 Name_4=Media
-Name_5=Games
+Name_5=Gaming
 Number=5
 Rows=1
 
