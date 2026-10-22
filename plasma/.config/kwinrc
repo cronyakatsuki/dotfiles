@@ -1,7 +1,15 @@
 [Desktops]
 Id_1=00ce176b-05f8-4f99-80ce-4732c5ea12dd
+Id_2=1e07e9c6-a1ae-4be4-b16c-9653802d4c67
+Id_3=d4a3fc7b-7ffe-4144-8688-47f3cc5bd570
+Id_4=9be581b5-09d4-495e-9c26-ce74b466e5c0
+Id_5=d4becb54-b5bc-485c-aa7d-de7dba51394b
 Name_1=Browser
-Number=1
+Name_2=Terminal
+Name_3=Communication
+Name_4=Media
+Name_5=Games
+Number=5
 Rows=1
 
 [Plugins]
@@ -15,7 +23,23 @@ tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"wi
 padding=4
 tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
 
+[Tiling][1e07e9c6-a1ae-4be4-b16c-9653802d4c67][cae46d91-dc86-41ee-bdef-2e050b8a0a70]
+padding=4
+tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
+
+[Tiling][9be581b5-09d4-495e-9c26-ce74b466e5c0][cae46d91-dc86-41ee-bdef-2e050b8a0a70]
+padding=4
+tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
+
 [Tiling][a4370a40-3613-5789-9d9c-216b0828af3d]
+tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
+
+[Tiling][d4a3fc7b-7ffe-4144-8688-47f3cc5bd570][cae46d91-dc86-41ee-bdef-2e050b8a0a70]
+padding=4
+tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
+
+[Tiling][d4becb54-b5bc-485c-aa7d-de7dba51394b][cae46d91-dc86-41ee-bdef-2e050b8a0a70]
+padding=4
 tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
 
 [Windows_HDR]
