@@ -33,17 +33,6 @@ restore-daemon-configs:
     sudo udevadm control --reload
     sudo systemctl start coolercontrold lactd
 
-# push zen chrome css into the native zen profile — REAL FILE COPIES, not symlinks:
-# gecko refuses to load symlinked chrome files (verified 2026-10-21 flatpak; kept
-# copies for native to be safe). Repo stays source of truth.
-# Edit css in the repo, then run: just sync-zen-chrome
-sync-zen-chrome:
-    mkdir -p $HOME/.config/zen/main/chrome
-    for f in userChrome.css userContent.css zen-logo-mocha.svg; do \
-        cp --remove-destination $HOME/dotfiles/zen/.config/zen/main/chrome/$f \
-           $HOME/.config/zen/main/chrome/$f; \
-    done
-
 # reinstall all pi agent extensions (package list lives in ~/.pi/agent/settings.json)
 pi-extensions:
     pi install npm:@zhushanwen/pi-model-switch
