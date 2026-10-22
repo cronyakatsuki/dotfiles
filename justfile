@@ -56,3 +56,15 @@ pi-extensions:
     pi install npm:pi-catppuccin
     pi install npm:pi-lens
     pi install npm:@0xkahi/pi-vim-keys
+
+# save installed package lists into system/ (run after installing/removing packages)
+packages-save:
+    mkdir -p system
+    pacman -Qqet > system/packages-explicit.txt
+    pacman -Qqem > system/packages-foreign.txt
+
+# reinstall tracked packages after a fresh distro install (explicit = official repos,
+# foreign = AUR/local via paru). -Qqet is explicit-only, so it stays lean.
+packages-install:
+    sudo pacman -S --needed - < system/packages-explicit.txt
+    paru -S --needed - < system/packages-foreign.txt
