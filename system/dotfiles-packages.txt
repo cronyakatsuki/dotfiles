@@ -16,7 +16,6 @@ atuin
 starship
 fastfetch
 yazi
-vim
 pkgfile
 git
 git-delta
@@ -43,12 +42,7 @@ mangohud
 lib32-mangohud
 v4l-utils
 gamescope
-kvantum
 papirus-icon-theme
-plasma
-kdeplasma-addons
-kde-gtk-config
-kwin-effect-rounded-corners
 vulkan-headers
 ffmpeg
 ffmpegthumbnailer
@@ -60,11 +54,6 @@ pipewire
 wireplumber
 
 ## AUR (paru)
-plasma6-applets-window-title
-plasma6-applets-virtual-desktop-bar-wayland
-plasma6-applets-panel-colorizer
-kwin-scripts-krohnkite-git
-kvantum-theme-catppuccin-git
 catppuccin-gtk-theme-mocha
 catppuccin-cursors-mocha
 papirus-folders-catppuccin-git
@@ -78,5 +67,3 @@ qmd
 # zap                — git clone zap-zsh/zap -> ~/.local/share/zap
 # tpm + tmux plugins — tpm/tmux-yank/vim-tmux-navigator/tmux-fzf-url via TPM
 # yazi plugins       — `ya pkg install` per package.toml (untracked)
-# Catppuccin KDE L&F — catppuccin/kde installer script, not a pkg
-# System Glance      — github renatoi/plasma-sysglance via kpackagetool6

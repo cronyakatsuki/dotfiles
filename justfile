@@ -55,16 +55,18 @@ packages-save:
 
 # reinstall tracked packages after a fresh distro install (explicit = official repos,
 # foreign = AUR/local via paru). -Qqet is explicit-only, so it stays lean.
+# NOTE: targets passed via xargs -a, NOT stdin — paru 2.1.0 breaks reading targets
+# from stdin ("failed to reopen stdin: No such device or address")
 packages-install:
-    sudo pacman -S --needed - < system/packages-explicit.txt
-    paru -S --needed - < system/packages-foreign.txt
+    xargs -a system/packages-explicit.txt sudo pacman -S --needed
+    xargs -a system/packages-foreign.txt paru -S --needed
 
 # install ONLY the packages needed by dotfiles configs (system/dotfiles-packages.txt).
 # repo + AUR in one paru pass; does NOT touch the full system explicit list.
 # After this, manual steps still required — see the file's Local/foreign section.
 packages-dotfiles-install:
     awk 'NF && $1 !~ /^#/' system/dotfiles-packages.txt > /tmp/dotfiles-pkgs.txt
-    paru -S --needed - < /tmp/dotfiles-pkgs.txt
+    xargs -a /tmp/dotfiles-pkgs.txt paru -S --needed
     rm /tmp/dotfiles-pkgs.txt
 
 # install plugin-manager content (plugin content, not packages — see

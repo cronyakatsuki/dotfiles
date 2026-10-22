@@ -17,7 +17,6 @@ Personal configuration files managed with [GNU Stow](https://www.gnu.org/softwar
 | `htop` | Process viewer | `~/.config/htop/htoprc` |
 | `lazygit` | Git TUI | `~/.config/lazygit/config.yml` |
 | `pi` | Pi agent extensions | `~/.pi/agent/extensions/` |
-| `plasma` | KDE Plasma desktop layout (panel, applets) | `~/.config/plasma*` |
 | `procs` | Modern `ps` replacement | `~/.config/procs/config.toml` |
 | `ripgrep` | Search tool | `~/.config/ripgrep/rg.conf` |
 | `starship` | Shell prompt | `~/.config/starship.toml` |

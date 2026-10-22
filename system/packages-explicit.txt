@@ -1,6 +1,5 @@
 alsa-firmware
 alsa-utils
-ark
 atuin
 awesome-terminal-fonts
 base
@@ -47,7 +46,6 @@ fsarchiver
 ghostty
 git-delta
 glances
-gwenview
 hdparm
 htop
 hwdetect
@@ -56,11 +54,6 @@ inetutils
 intel-lpmd
 intel-ucode
 just
-kde-gtk-config
-kdeplasma-addons
-kvantum-theme-catppuccin-git
-kwin-effect-rounded-corners
-kwin-scripts-krohnkite-git
 lact
 libgsf
 libva-nvidia-driver
@@ -84,17 +77,7 @@ nvtop
 opentabletdriver
 os-prober
 papirus-folders-catppuccin-git
-partitionmanager
 pi-bin
-plasma-browser-integration
-plasma-desktop
-plasma-firewall
-plasma-login-manager
-plasma-systemmonitor
-plasma-thunderbolt
-plasma6-applets-panel-colorizer
-plasma6-applets-virtual-desktop-bar-wayland
-plasma6-applets-window-title
 procs
 profile-sync-daemon
 pv
