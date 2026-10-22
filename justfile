@@ -84,3 +84,9 @@ bootstrap:
     "$HOME/.local/share/tmux/plugins/tpm/scripts/install_plugins.sh"
     # yazi plugins/flavors from package.toml
     cd $HOME/.config/yazi && ya pkg install
+
+# after restoring ~/.pi from a restic snapshot (nas/backblaze/drive repos may
+# contain the old MANAGED self-install), purge it so /usr/bin/pi stays the
+# system package. Safe no-op if the restore came from the clean local repo.
+pi-purge-managed:
+    rm -rf $HOME/.pi/agent/bin $HOME/.pi/agent/install
