@@ -57,6 +57,7 @@ wireplumber
 catppuccin-gtk-theme-mocha
 catppuccin-cursors-mocha
 papirus-folders-catppuccin-git
+vesktop-bin
 opentabletdriver
 sesh
 ouch
