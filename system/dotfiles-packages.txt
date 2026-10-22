@@ -68,7 +68,7 @@ papirus-folders-catppuccin-git
 opentabletdriver
 sesh
 ouch
-pi
+pi-bin
 qmd
 
 ## Local/foreign (not repo-installable)
