@@ -39,7 +39,6 @@ stow
 lact
 coolercontrol
 nix
-flatpak
 mangohud
 lib32-mangohud
 v4l-utils
@@ -69,10 +68,10 @@ papirus-folders-catppuccin-git
 opentabletdriver
 sesh
 ouch
-vesktop
+pi
+qmd
 
 ## Local/foreign (not repo-installable)
-# pi, qmd            — foreign pkgs (pi agent + qmd), pi extensions via `just pi-extensions`
 # zap                — git clone zap-zsh/zap -> ~/.local/share/zap
 # tpm + tmux plugins — tpm/tmux-yank/vim-tmux-navigator/tmux-fzf-url via TPM
 # yazi plugins       — `ya pkg install` per package.toml (untracked)
