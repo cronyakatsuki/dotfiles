@@ -36,6 +36,7 @@ direnv
 dmraid
 dolphin
 duf
+deepfilternet-ladspa
 dust
 easyeffects
 efitools
