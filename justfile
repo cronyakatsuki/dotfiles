@@ -40,7 +40,7 @@ restore-daemon-configs:
 sync-zen-chrome:
     mkdir -p $HOME/.config/zen/main/chrome
     for f in userChrome.css userContent.css zen-logo-mocha.svg; do \
-        cp $HOME/dotfiles/zen/.config/zen/main/chrome/$f \
+        cp --remove-destination $HOME/dotfiles/zen/.config/zen/main/chrome/$f \
            $HOME/.config/zen/main/chrome/$f; \
     done
 
