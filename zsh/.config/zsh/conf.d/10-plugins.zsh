@@ -3,9 +3,10 @@
 # Custom completion directory (must be before compinit)
 fpath+=("${ZDOTDIR}/completions")
 
-# Zap plugin manager
+# Zap plugin manager (bootstrapped via `just bootstrap`; warn if missing)
 zap_file="${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh"
-[[ -f "$zap_file" ]] && source "$zap_file"
+if [[ -f "$zap_file" ]]; then source "$zap_file"
+else print -P " %F{yellow}zap missing — run: just bootstrap%f" >&2; fi
 
 plug "cronyakatsuki/supercharge"
 plug "zap-zsh/completions"
