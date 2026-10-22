@@ -68,3 +68,11 @@ packages-save:
 packages-install:
     sudo pacman -S --needed - < system/packages-explicit.txt
     paru -S --needed - < system/packages-foreign.txt
+
+# install ONLY the packages needed by dotfiles configs (system/dotfiles-packages.txt).
+# repo + AUR in one paru pass; does NOT touch the full system explicit list.
+# After this, manual steps still required — see the file's Local/foreign section.
+packages-dotfiles-install:
+    awk 'NF && $1 !~ /^#/' system/dotfiles-packages.txt > /tmp/dotfiles-pkgs.txt
+    paru -S --needed - < /tmp/dotfiles-pkgs.txt
+    rm /tmp/dotfiles-pkgs.txt
