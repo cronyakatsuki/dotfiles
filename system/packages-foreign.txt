@@ -1,3 +1,7 @@
+kwin-scripts-krohnkite-git
 neovim-symlinks
 pi-bin
+plasma6-applets-panel-colorizer
+plasma6-applets-virtual-desktop-bar-wayland
+plasma6-applets-window-title
 qmd

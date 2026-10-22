@@ -14,6 +14,7 @@ Rows=1
 
 [Plugins]
 krohnkiteEnabled=true
+kwin4_effect_shapecornersEnabled=true
 
 [Tiling][00ce176b-05f8-4f99-80ce-4732c5ea12dd][]
 padding=4
