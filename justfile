@@ -76,3 +76,21 @@ packages-dotfiles-install:
     awk 'NF && $1 !~ /^#/' system/dotfiles-packages.txt > /tmp/dotfiles-pkgs.txt
     paru -S --needed - < /tmp/dotfiles-pkgs.txt
     rm /tmp/dotfiles-pkgs.txt
+
+# install plugin-manager content (plugin content, not packages — see
+# system/dotfiles-packages.txt): zap, tmux plugins via tpm, yazi plugins.
+# Safe to re-run; existing dirs/clones are left alone.
+bootstrap:
+    # zap (plugin content auto-clones on first interactive zsh)
+    if [ ! -f "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh" ]; then \
+        git clone https://github.com/zap-zsh/zap.git \
+            "${XDG_DATA_HOME:-$HOME/.local/share}/zap"; \
+    fi
+    # tpm + the @plugin entries in tmux.conf
+    if [ ! -f "$HOME/.local/share/tmux/plugins/tpm/tpm" ]; then \
+        git clone https://github.com/tmux-plugins/tpm \
+            "$HOME/.local/share/tmux/plugins/tpm"; \
+    fi
+    "$HOME/.local/share/tmux/plugins/tpm/scripts/install_plugins.sh"
+    # yazi plugins/flavors from package.toml
+    cd $HOME/.config/yazi && ya pkg install
