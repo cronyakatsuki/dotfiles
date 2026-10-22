@@ -1,6 +1,7 @@
 alsa-firmware
 alsa-utils
 ark
+atuin
 awesome-terminal-fonts
 base
 betterbird-bin
@@ -27,12 +28,16 @@ cachyos-v3-mirrorlist
 cachyos-v4-mirrorlist
 cachyos-wallpapers
 cantarell-fonts
+calf
 char-white
 coolercontrol
 cpupower
+direnv
 dmraid
 dolphin
 duf
+dust
+easyeffects
 efitools
 ethtool
 ffmpegthumbnailer
@@ -42,6 +47,7 @@ git-delta
 glances
 gwenview
 hdparm
+htop
 hwdetect
 hwinfo
 inetutils
@@ -53,6 +59,7 @@ kdeplasma-addons
 lact
 libgsf
 libva-nvidia-driver
+lsp-plugins-lv2
 limine-snapper-sync
 linux-cachyos-headers
 linux-cachyos-lts-headers
@@ -63,12 +70,14 @@ logrotate
 lsscsi
 man-pages
 meld
+mpv
 mtools
 netctl
 networkmanager-openvpn
 nfs-utils
 nix
 nvtop
+opentabletdriver
 os-prober
 partitionmanager
 pi-bin
@@ -78,6 +87,7 @@ plasma-firewall
 plasma-login-manager
 plasma-systemmonitor
 plasma-thunderbolt
+procs
 profile-sync-daemon
 pv
 qbittorrent
@@ -90,11 +100,12 @@ scrcpy
 sg3_utils
 sof-firmware
 spectacle
+starship
 stow
 tree-sitter-cli
 ttf-opensans
 ufw-extras
 vesktop-bin
 xl2tpd
+yazi
 zen-browser-bin
-zoxide

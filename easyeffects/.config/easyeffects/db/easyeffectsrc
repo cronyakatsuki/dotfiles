@@ -18,13 +18,13 @@ visiblePlugin=rnnoise#0
 mostUsedPresets=Advanced Auto Gain,Bass Enhancing + Perfect EQ - Low Latency,Soundbar,Headphones,Bass Enhancing + Perfect EQ
 outputDevice=alsa_output.usb-Creative_Technology_Ltd_Creative_Stage_Air_V2_Creative_Lab-01.analog-stereo
 plugins=equalizer#0,exciter#0,autogain#0,limiter#0
-usedPresets=Soundbar:18,Bass Enhancing + Perfect EQ:5,Boosted:4,Perfect EQ:4,Bass Boosted:2,Dolby Atmos:2,Headphones:10,Loudness+Autogain:4,Laptop:2,Speaker Sync:2,Bass Enhancing + Perfect EQ - Low Latency:135,Advanced Auto Gain:198
+usedPresets=Soundbar:18,Bass Enhancing + Perfect EQ:5,Boosted:4,Perfect EQ:4,Bass Boosted:2,Dolby Atmos:2,Headphones:10,Loudness+Autogain:4,Laptop:2,Speaker Sync:2,Bass Enhancing + Perfect EQ - Low Latency:135,Advanced Auto Gain:200
 visiblePage=pluginsPage
-visiblePlugin=equalizer#0
+visiblePlugin=exciter#0
 
 [Window]
 autostartOnLogin=true
-height=1368
+height=1366
 inputAutoloadingFallbackPreset=EasyEffects Microphone Preset: Masc NPR Voice + Noise Reduction
 outputAutoloadingFallbackPreset=Advanced Auto Gain
 outputAutoloadingUsesFallback=true
