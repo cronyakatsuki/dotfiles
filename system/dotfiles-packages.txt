@@ -78,4 +78,4 @@ vesktop
 # yazi plugins       — `ya pkg install` per package.toml (untracked)
 # Catppuccin KDE L&F — catppuccin/kde installer script, not a pkg
 # System Glance      — github renatoi/plasma-sysglance via kpackagetool6
-# fonts/             — repo-local fonts + a nerd font pkig needed for starship
+# fonts/             — repo-local fonts + a nerd font pkg needed for starship
