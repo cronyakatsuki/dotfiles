@@ -1,0 +1,4 @@
+# Packages in this repo that are NOT stow packages (plain `stow */` skips them).
+# They hold repo data only — never link their contents into $HOME.
+daemon-configs
+system
