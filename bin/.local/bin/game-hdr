@@ -23,6 +23,8 @@
 #   --wd-off           append /WineDetectionEnabled:False (fixes startup deadlock
 #                      in Denuvo/Wine thread-detection on some RE Engine games,
 #                      e.g. Onimusha: Way of the Sword 2026-10-17)
+#   --no-ntsync        export PROTON_NO_NTSYNC=1 (Onimusha WotS ntsync_schedule
+#                      launch deadlock 2026-10-23; pairs with --wd-off there)
 #   --dry              print the command + env that would run, then exit
 #   --help             show this help
 #
