@@ -52,6 +52,7 @@ ttf-monaspace-frozen
 ttf-nerd-fonts-symbols-mono
 pipewire
 wireplumber
+syncthing
 
 ## AUR (paru)
 catppuccin-gtk-theme-mocha
@@ -63,6 +64,7 @@ sesh
 ouch
 pi-bin
 qmd
+python-lnxlink
 
 ## Local/foreign (not repo-installable)
 # zap                — git clone zap-zsh/zap -> ~/.local/share/zap
