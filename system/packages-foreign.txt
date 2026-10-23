@@ -4,3 +4,5 @@ neovim-symlinks
 papirus-folders-catppuccin-git
 pi-bin
 qmd
+sddm-astronaut-theme
+sesh-bin
