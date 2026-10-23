@@ -31,7 +31,7 @@
 
 RES="2560x1440"
 NITS="200"
-ITM=0; SWAPPER=0; SMOOTH=0; HDR=1; MANGO=1; VRR=1; LITE=0; DRY=0; MANGOHUD=0; WDOFF=0; LOWLAT=0
+ITM=0; SWAPPER=0; SMOOTH=0; HDR=1; MANGO=1; VRR=1; LITE=0; DRY=0; MANGOHUD=0; WDOFF=0; LOWLAT=0; NTSYNC=1
 DLLOVR=""
 
 while [ $# -gt 0 ]; do
@@ -49,6 +49,7 @@ while [ $# -gt 0 ]; do
 		--no-vrr) VRR=0 ;;
 		--lite) LITE=1 ;;
 		--wd-off|--no-winedetect) WDOFF=1 ;;
+	--no-ntsync) NTSYNC=0 ;;
 		--dry) DRY=1 ;;
 		--help|-h)
 			sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'
@@ -81,6 +82,13 @@ if [ "$LOWLAT" -eq 1 ]; then
 	export PROTON_VKD3D_LOWLATENCY=1
 	export PROTON_DXVK_LOWLATENCY=1
 fi
+if [ "$NTSYNC" -eq 0 ]; then
+	# wineserver only reads PROTON_NO_NTSYNC (ntsync is ON by default when
+	# /dev/ntsync exists; PROTON_ENABLE_NTSYNC is ignored by this wine build).
+	# Onimusha WotS ntsync_schedule deadlock: kernel 7.3.0-3 + proton-cachyos-slr
+	# 11.0-20261015, 2026-10-23.
+	export PROTON_NO_NTSYNC=1
+fi
 if [ "$HDR" -eq 1 ]; then
 	export DXVK_HDR=1
 fi
@@ -108,7 +116,7 @@ fi
 
 if [ "$DRY" -eq 1 ]; then
 	echo "env:"
-	echo "  PROTON_ENABLE_NTSYNC=1"
+	[ "$NTSYNC" -eq 0 ] && echo "  PROTON_NO_NTSYNC=1"
 	echo "  PROTON_DISCORD_BRIDGE=1"
 	echo "  PROTON_LOCAL_SHADER_CACHE=1"
 	[ "$LOWLAT" -eq 1 ] && echo "  PROTON_VKD3D_LOWLATENCY=1"
