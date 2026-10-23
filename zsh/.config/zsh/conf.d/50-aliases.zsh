@@ -5,10 +5,13 @@ alias lt='eza --tree --level=2 --icons=auto'
 alias l='eza -lbF --icons=auto'
 
 # ---- fd defaults ----
-# --hidden: include dotfiles, --strip-cwd-prefix: drop the ./ prefix on results
-alias fd='fd --hidden --strip-cwd-prefix'
-alias fdf='fd --type f --hidden --strip-cwd-prefix'  # files only
-alias fdd='fd --type d --hidden --strip-cwd-prefix'  # dirs only
+# --hidden: include dotfiles
+# NOTE: no --strip-cwd-prefix here — fd 10 makes it conflict with an explicit
+# path argument (cd ~/dotfiles && fd foo /etc would error). Default no-path
+# searches show the ./ prefix; drop it manually if it bothers you.
+alias fd='fd --hidden'
+alias fdf='fd --type f --hidden'  # files only
+alias fdd='fd --type d --hidden'  # dirs only
 
 # ---- duf / dust (readable replacements for df / du) ----
 alias df='duf'
