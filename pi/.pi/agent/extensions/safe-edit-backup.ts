@@ -649,6 +649,153 @@ async function askCommitApproval(
   }
 }
 
+type SecretAction = "auto" | "manual";
+
+/**
+ * A secret was detected in a file that was about to be committed. Ask the
+ * user whether the extension may fix the git state automatically or they
+ * will handle it manually. NEVER deletes the disk file:
+ *   tracked   → auto = `<tool> rm --cached` + .gitignore entry (file kept)
+ *   untracked → auto = .gitignore entry only
+ * esc/enter and headless sessions = "manual" (fail-closed: no state change).
+ */
+async function askSecretAction(
+  ctx: ExtensionContext,
+  file: string,
+  reason: string,
+  tracked: boolean,
+): Promise<SecretAction> {
+  if (ctx.mode !== "tui") {
+    try {
+      ctx.ui.notify(
+        `safe-edit: ${reason} in ${basename(file)} — commit blocked (headless, no auto-fix possible — handle manually)`,
+        "warning",
+      );
+    } catch {
+      // ignore — still blocked
+    }
+    return "manual";
+  }
+
+  try {
+    const decision = await ctx.ui.custom<SecretAction>(
+      (_tui, theme, _keybindings, done) => {
+        let cachedWidth: number | undefined;
+        let cachedLines: string[] | undefined;
+        const invalidate = () => {
+          cachedWidth = undefined;
+          cachedLines = undefined;
+        };
+        return {
+          render(width: number): string[] {
+            if (cachedLines && cachedWidth === width) return cachedLines;
+            cachedWidth = width;
+            const rule = theme.fg("dim", "─".repeat(Math.min(width, 64)));
+            const autoLabel = tracked
+              ? "[u] auto-fix: untrack (rm --cached) + .gitignore — file KEPT on disk"
+              : "[g] auto-fix: add to .gitignore — file kept on disk, uncommitted";
+            cachedLines = [
+              rule,
+              theme.fg(
+                "error",
+                tracked
+                  ? "⚠ SECRET DETECTED in a TRACKED file — commit blocked"
+                  : "⚠ SECRET DETECTED — commit blocked",
+              ),
+              `file: ${file}`,
+              theme.fg("warning", `reason: ${reason}`),
+              "",
+              theme.fg(
+                "text",
+                tracked
+                  ? "File is already in git history — rotate the secret regardless."
+                  : "File is not committed yet.",
+              ),
+              "",
+              theme.fg("accent", autoLabel),
+              theme.fg("accent", "[m] I'll handle it manually — change nothing"),
+              theme.fg("dim", "esc / enter = change nothing (manual)"),
+              rule,
+            ].map((l) => truncateToWidth(l, width));
+            return cachedLines;
+          },
+          handleInput(data: string): void {
+            if (data === "u" || data === "U" || data === "g" || data === "G") {
+              done("auto");
+            } else if (
+              data === "m" ||
+              data === "M" ||
+              data === "\x1b" ||
+              data === "\r" ||
+              data === "\n"
+            ) {
+              done("manual");
+            } else {
+              return;
+            }
+          },
+          invalidate,
+        };
+      },
+    );
+    return decision ?? "manual";
+  } catch {
+    // dialog failed → change nothing
+    return "manual";
+  }
+}
+
+/**
+ * Execute the "auto" secret fix. tool picks the untrack command (git/yadm);
+ * gitRoot === null means skip the .gitignore step (e.g. yadm repo is $HOME).
+ */
+async function handleSecretAuto(
+  ctx: ExtensionContext,
+  tool: string,
+  file: string,
+  secret: string,
+  tracked: boolean,
+  gitRoot: string | null,
+): Promise<void> {
+  try {
+    if (tracked) {
+      execFileSync(
+        tool === "yadm" ? "yadm" : "git",
+        ["rm", "--cached", "--", file],
+        gitRoot ? { cwd: gitRoot, stdio: "pipe" } : { stdio: "pipe" },
+      );
+      if (gitRoot) addToGitignore(gitRoot, file);
+      try {
+        ctx.ui.notify(
+          `safe-edit: untracked ${basename(file)} (${tool} rm --cached${gitRoot ? " + .gitignore" : ""}) — file KEPT on disk. Rotate the secret!`,
+          "warning",
+        );
+      } catch {
+        // ignore
+      }
+      return;
+    }
+    const added = gitRoot ? addToGitignore(gitRoot, file) : false;
+    try {
+      ctx.ui.notify(
+        `safe-edit: ${secret} in ${basename(file)} — commit blocked${added ? ", added to .gitignore" : ""}`,
+        "warning",
+      );
+    } catch {
+      // ignore
+    }
+  } catch {
+    try {
+      ctx.ui.notify(
+        `safe-edit: auto-fix FAILED for ${basename(file)} — handle manually (${secret})`,
+        "error",
+      );
+    } catch {
+      // ignore
+    }
+  }
+}
+
 // ---- Git / yadm / chezmoi commit flows ----
 
 async function gitCommitIfNeeded(
@@ -680,26 +827,18 @@ async function gitCommitIfNeeded(
     const secret = scanForSecrets(realFile);
     if (secret) {
       const tracked = isTrackedByGit(realFile, gitRoot);
-      if (tracked) {
-        // Skip + alert only; never change tracked state silently
-        await askCommitApproval(ctx, {
-          tool: "git",
-          file: realFile,
-          message: "(commit blocked)",
-          diff: `SECRET DETECTED in a TRACKED file: ${realFile}\nReason: ${secret}\n\nNo commit was made. Handle manually, e.g.:\n  git rm --cached "${relative(gitRoot, realFile)}"\n  (rotate the secret, then commit the removal yourself)`,
-          secretAlert: secret,
-        });
-        return;
-      }
-      // Untracked: add to .gitignore, no commit
-      const added = addToGitignore(gitRoot, realFile);
-      try {
-        ctx.ui.notify(
-          `safe-edit: ${secret} in ${basename(realFile)} — commit blocked${added ? `, added to .gitignore` : ""}`,
-          "warning",
-        );
-      } catch {
-        // no UI — still blocked, which is the important part
+      const action = await askSecretAction(ctx, realFile, secret, tracked);
+      if (action === "auto") {
+        await handleSecretAuto(ctx, "git", realFile, secret, tracked, gitRoot);
+      } else {
+        try {
+          ctx.ui.notify(
+            `safe-edit: ${basename(realFile)} left for manual handling — commit blocked (${secret})`,
+            "info",
+          );
+        } catch {
+          // ignore — still blocked
+        }
       }
       return;
     }
@@ -796,14 +935,25 @@ function yadmCommit(
   // Secret scan — yadm files live in $HOME, be extra careful there
   const secret = scanForSecrets(file);
   if (secret) {
-    try {
-      ctx.ui.notify(
-        `safe-edit: ${secret} in ${basename(file)} — yadm commit blocked`,
-        "warning",
-      );
-    } catch {
-      // ignore — still blocked
-    }
+    // yadm files are by definition tracked; auto-fix = untrack only (the yadm
+    // repo root is $HOME — NEVER write a $HOME/.gitignore from here)
+    (async () => {
+      const action = await askSecretAction(ctx, file, secret, true);
+      if (action === "auto") {
+        await handleSecretAuto(ctx, "yadm", file, secret, true, null);
+      } else {
+        try {
+          ctx.ui.notify(
+            `safe-edit: ${basename(file)} left for manual handling — yadm commit blocked (${secret})`,
+            "info",
+          );
+        } catch {
+          // ignore — still blocked
+        }
+      }
+    })().catch(() => {
+      // never break the tool call
+    });
     return;
   }
 
@@ -878,18 +1028,24 @@ function chezmoiCommit(
     // Secret scan on the source file (that's what gets committed)
     const secret = scanForSecrets(src);
     if (secret) {
-      const tracked = isTrackedByGit(src, gitRoot);
-      if (!tracked) {
-        addToGitignore(gitRoot, src);
-      }
-      try {
-        ctx.ui.notify(
-          `safe-edit: ${secret} in chezmoi source ${basename(src)} — commit blocked${tracked ? " (file tracked, review manually)" : ", added to .gitignore"}`,
-          "warning",
-        );
-      } catch {
-        // ignore — still blocked
-      }
+      (async () => {
+        const tracked = isTrackedByGit(src, gitRoot);
+        const action = await askSecretAction(ctx, src, secret, tracked);
+        if (action === "auto") {
+          await handleSecretAuto(ctx, "git", src, secret, tracked, gitRoot);
+        } else {
+          try {
+            ctx.ui.notify(
+              `safe-edit: chezmoi source ${basename(src)} left for manual handling — commit blocked (${secret})`,
+              "info",
+            );
+          } catch {
+            // ignore — still blocked
+          }
+        }
+      })().catch(() => {
+        // never break the tool call
+      });
       return;
     }
 
