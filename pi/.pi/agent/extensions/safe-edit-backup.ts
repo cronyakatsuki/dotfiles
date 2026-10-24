@@ -556,29 +556,40 @@ async function askCommitApproval(
             if (cachedLines && cachedWidth === width) return cachedLines;
             cachedWidth = width;
 
+            const rule = theme.fg("dim", "─".repeat(Math.min(width, 64)));
             const head = [
-              theme.fg("accent", `safe-edit-backup — ${preview.tool} commit approval`),
+              rule,
+              theme.fg(
+                "accent",
+                `⏸  COMMIT APPROVAL — ${preview.tool} — awaiting your key`,
+              ),
               `file: ${preview.file}`,
-              theme.fg("accent", `message: ${preview.message}`),
+              theme.fg("success", `message: ${preview.message}`),
               "",
             ];
             const { lines: diffLines, omitted } = renderDiffLines(
               preview.diff,
               width,
               DIFF_PREVIEW_LINES,
+              theme,
             );
             const tail = [
               ...(preview.secretAlert
-                ? [theme.fg("accent", `ALERT: ${preview.secretAlert}`)]
+                ? [theme.fg("error", `⚠ ${preview.secretAlert}`)]
                 : []),
               ...(omitted > 0
                 ? [theme.fg("dim", `… ${omitted} more diff lines omitted`)]
                 : []),
               "",
               theme.fg(
-                "dim",
-                "[c] commit   [s] skip   [a] always this session (this file)   esc = skip",
+                "accent",
+                "[c] commit   [s] skip   [a] always (this file, this session)",
               ),
+              theme.fg(
+                "dim",
+                "esc / enter = skip — nothing is committed until you press c or a",
+              ),
+              rule,
             ].map((l) => truncateToWidth(l, width));
 
             cachedLines = [...head, ...diffLines, ...tail];
