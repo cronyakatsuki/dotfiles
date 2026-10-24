@@ -508,13 +508,32 @@ interface CommitPreview {
   secretAlert?: string; // set when a secret blocked the commit
 }
 
-/** One-line-per-entry diff renderer; falls back gracefully when no theme. */
-function renderDiffLines(diff: string, width: number, maxLines: number): {
+/** Colored diff renderer: +/− lines green/red, @@ hunks accent, file headers dim. */
+function renderDiffLines(
+  diff: string,
+  width: number,
+  maxLines: number,
+  theme: { fg: (token: string, text: string) => string },
+): {
   lines: string[];
   omitted: number;
 } {
-  const raw = diff.length ? diff.split("\n") : ["(no textual diff — new/empty file)"];
-  const shown = raw.slice(0, maxLines).map((l) => truncateToWidth(l, width));
+  const raw = diff.length
+    ? diff.split("\n")
+    : ["(no textual diff — new/empty file)"];
+  const colorize = (l: string): string => {
+    if (l.startsWith("@@")) return theme.fg("accent", l);
+    if (l.startsWith("+") && !l.startsWith("+++"))
+      return theme.fg("toolDiffAdded", l);
+    if (l.startsWith("-") && !l.startsWith("---"))
+      return theme.fg("toolDiffRemoved", l);
+    if (/^(diff --git|index |--- |\\+\\+\\+ )/.test(l)) return theme.fg("dim", l);
+    if (/^\(no textual diff/.test(l)) return theme.fg("warning", l);
+    return theme.fg("toolDiffContext", l);
+  };
+  const shown = raw
+    .slice(0, maxLines)
+    .map((l) => truncateToWidth(colorize(l), width));
   const omitted = Math.max(0, raw.length - maxLines);
   return { lines: shown, omitted };
 }
