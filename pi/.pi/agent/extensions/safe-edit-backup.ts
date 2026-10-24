@@ -74,7 +74,6 @@ import {
   readdirSync,
   unlinkSync,
   realpathSync,
-  statSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, basename, resolve, relative } from "node:path";
@@ -543,7 +542,7 @@ async function askCommitApproval(
 
   try {
     return await ctx.ui.custom<ApprovalDecision | undefined>(
-      (tui, theme, _keybindings, done) => {
+      (_tui, theme, _keybindings, done) => {
         let cachedWidth: number | undefined;
         let cachedLines: string[] | undefined;
 
