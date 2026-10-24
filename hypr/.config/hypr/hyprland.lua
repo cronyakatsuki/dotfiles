@@ -1,15 +1,3 @@
--- This is an example Hyprland Lua config file.
--- Refer to the wiki for more information.
--- https://wiki.hypr.land/Configuring/Start/
-
--- Please note not all available settings / options are set here.
--- For a full list, see the wiki
-
--- You can (and should!!) split this configuration into multiple files
--- Create your files separately and then require them like this:
--- require("myColors")
-
-
 ------------------
 ---- MONITORS ----
 ------------------
@@ -33,12 +21,8 @@ hl.monitor({
 })
 
 
--- hl.config({
---   quirks = { prefer_hdr = 2 },
--- })
-
 hl.config({
-  render = { direct_scanout = 2 }
+  render = { direct_scanout = 2, cm_auto_hdr = 0 }
 })
 
 ---------------------
@@ -47,8 +31,6 @@ hl.config({
 
 -- Set programs that you use
 local app         = "uwsm app --"
--- 2026-10-23: dropped --gtk-single-instance (single daemon kept stale env across
--- uwsm session restarts → hyprctl/HYPRLAND_INSTANCE_SIGNATURE mismatch).
 local terminal    = "ghostty"
 local fileManager = terminal .. " -e yazi"
 local menu        = "hyprlauncher"
@@ -59,24 +41,11 @@ local browser     = "zen.desktop"
 ---- AUTOSTART ----
 -------------------
 
--- See https://wiki.hypr.land/Configuring/Basics/Autostart/
-
--- Autostart necessary processes (like notifications daemons, status bars, etc.)
--- Or execute your favorite apps at launch like this:
---
--- hl.on("hyprland.start", function ()
---   hl.exec_cmd(terminal)
---   hl.exec_cmd("nm-applet")
---   hl.exec_cmd("waybar & hyprpaper & firefox")
--- end)
-
-
--------------------------------
----- ENVIRONMENT VARIABLES ----
--------------------------------
-
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/
-
+hl.on("hyprland.start", function()
+  hl.exec_cmd("systemctl --user start ironbar.service")
+  hl.exec_cmd("systemctl --user start swaync.service")
+  hl.exec_cmd("systemctl --user start hypridle.service")
+end)
 
 
 -----------------------
@@ -105,46 +74,19 @@ local browser     = "zen.desktop"
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
   general = {
-    gaps_in          = 5,
-    gaps_out         = 20,
+    gaps_in       = 5,
+    gaps_out      = 10,
 
-    border_size      = 2,
+    border_size   = 2,
 
-    col              = {
-      active_border   = { colors = { "rgba(33ccffee)", "rgba(00ff99ee)" }, angle = 45 },
-      inactive_border = "rgba(595959aa)",
+    col           = {
+      active_border   = "rgb(f5e0dc)",
+      inactive_border = "rgb(313244)",
     },
 
-    -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
-    resize_on_border = false,
+    allow_tearing = true,
 
-    -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
-    allow_tearing    = false,
-
-    layout           = "dwindle",
-  },
-
-  decoration = {
-    rounding         = 10,
-    rounding_power   = 2,
-
-    -- Change transparency of focused and unfocused windows
-    active_opacity   = 1.0,
-    inactive_opacity = 1.0,
-
-    shadow           = {
-      enabled      = true,
-      range        = 4,
-      render_power = 3,
-      color        = 0xee1a1a1a,
-    },
-
-    blur             = {
-      enabled  = true,
-      size     = 3,
-      passes   = 1,
-      vibrancy = 0.1696,
-    },
+    layout        = "master",
   },
 
   animations = {
@@ -180,35 +122,10 @@ hl.animation({ leaf = "workspacesIn", enabled = true, speed = 1.21, bezier = "al
 hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
 
--- Ref https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
--- "Smart gaps" / "No gaps when only"
--- uncomment all if you wish to use that.
--- hl.workspace_rule({ workspace = "w[tv1]", gaps_out = 0, gaps_in = 0 })
--- hl.workspace_rule({ workspace = "f[1]",   gaps_out = 0, gaps_in = 0 })
--- hl.window_rule({
---     name  = "no-gaps-wtv1",
---     match = { float = false, workspace = "w[tv1]" },
---     border_size = 0,
---     rounding    = 0,
--- })
--- hl.window_rule({
---     name  = "no-gaps-f1",
---     match = { float = false, workspace = "f[1]" },
---     border_size = 0,
---     rounding    = 0,
--- })
-
--- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
-hl.config({
-  dwindle = {
-    preserve_split = true, -- You probably want this
-  },
-})
-
 -- See https://wiki.hypr.land/Configuring/Layouts/Master-Layout/ for more
 hl.config({
   master = {
-    new_status = "master",
+    mfact = 0.50,
   },
 })
 
@@ -225,8 +142,19 @@ hl.config({
 
 hl.config({
   misc = {
-    force_default_wallpaper = -1,    -- Set to 0 or 1 to disable the anime mascot wallpapers
-    disable_hyprland_logo   = false, -- If true disables the random hyprland logo / anime girl background. :(
+    force_default_wallpaper    = -1,    -- Set to 0 or 1 to disable the anime mascot wallpapers
+    disable_hyprland_logo      = false, -- If true disables the random hyprland logo / anime girl background. :(
+    mouse_move_enables_dpms    = true,
+    key_press_enables_dpms     = true,
+    focus_on_activate          = true,
+    allow_session_lock_restore = true,
+  },
+  cursor = {
+    min_refresh_rate = 60,
+  },
+  ecosystem = {
+    no_update_news = true,
+    no_donation_nag = true,
   },
 })
 
@@ -237,39 +165,33 @@ hl.config({
 
 hl.config({
   input = {
-    kb_layout    = "hr",
-    kb_variant   = "us",
-    kb_model     = "",
-    kb_options   = "",
-    kb_rules     = "",
+    kb_layout     = "hr",
+    kb_variant    = "us",
+    kb_model      = "",
+    kb_options    = "",
+    kb_rules      = "",
 
-    follow_mouse = 1,
+    follow_mouse  = 1,
 
-    sensitivity  = 0, -- -1.0 - 1.0, 0 means no modification.
+    sensitivity   = 0, -- -1.0 - 1.0, 0 means no modification.
+    accel_profile = "flat",
 
-    touchpad     = {
+    touchpad      = {
       natural_scroll = false,
     },
   },
 })
 
-hl.gesture({
-  fingers = 3,
-  direction = "horizontal",
-  action = "workspace"
-})
-
--- Example per-device config
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/ for more
-hl.device({
-  name        = "epic-mouse-v1",
-  sensitivity = -0.5,
-})
-
-
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
+
+hl.config({
+  binds = {
+    allow_workspace_cycles = true,
+    movefocus_cycles_fullscreen = true,
+  }
+})
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
@@ -277,19 +199,20 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(app .. " " .. terminal))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(app .. " " .. browser))
 local closeWindowBind = hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
--- closeWindowBind:set_enabled(false)
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("uwsm stop"))
+hl.bind(mainMod .. " + CTRL + R", hl.dsp.exec_cmd("uwsm stop"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(app .. " " .. fileManager))
 hl.bind(mainMod .. " + SHIFT + Space", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(app .. " " .. menu))
-hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle only
 
 -- Move focus with mainMod + arrow keys
-hl.bind(mainMod .. " + h", hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + j", hl.dsp.focus({ direction = "down" }))
-hl.bind(mainMod .. " + k", hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + l", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + j", hl.dsp.layout("cyclenext"))
+hl.bind(mainMod .. " + k", hl.dsp.layout("cycleprev"))
+hl.bind(mainMod .. " + SHIFT + j", hl.dsp.layout("swapnext"))
+hl.bind(mainMod .. " + SHIFT + k", hl.dsp.layout("swapprev"))
+
+-- Fullscreen focused window
+hl.bind(mainMod .. " + f", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
+
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
@@ -298,6 +221,9 @@ for i = 1, 10 do
   hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
   hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
+
+-- Focus previous workspace
+hl.bind(mainMod .. " + TAB", hl.dsp.focus({ workspace = "previous" }))
 
 -- Example special workspace (scratchpad)
 hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
@@ -334,11 +260,6 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 ---- WINDOWS AND WORKSPACES ----
 --------------------------------
 
--- See https://wiki.hypr.land/Configuring/Basics/Window-Rules/
--- and https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
-
--- Example window rules that are useful
-
 local suppressMaximizeRule = hl.window_rule({
   -- Ignore maximize requests from all apps. You'll probably like this.
   name           = "suppress-maximize-events",
@@ -363,14 +284,6 @@ hl.window_rule({
   no_focus = true,
 })
 
--- Layer rules also return a handle.
--- local overlayLayerRule = hl.layer_rule({
---     name  = "no-anim-overlay",
---     match = { namespace = "^my-overlay$" },
---     no_anim = true,
--- })
--- overlayLayerRule:set_enabled(false)
-
 -- Hyprland-run windowrule
 hl.window_rule({
   name  = "move-hyprland-run",
@@ -379,3 +292,8 @@ hl.window_rule({
   move  = "20 monitor_h-120",
   float = true,
 })
+
+hl.workspace_rule({workspace = "1", layout = "monocle"})
+hl.workspace_rule({workspace = "4", layout = "monocle"})
+hl.workspace_rule({workspace = "5", layout = "monocle"})
+hl.workspace_rule({workspace = "6", layout = "float"})
