@@ -44,3 +44,6 @@ system/*.tmp
 
 # OpenTabletDriver runtime logs (app writes into the stowed config dir while running)
 opentabletdriver/.config/OpenTabletDriver/Logs/
+/mpv/.config/mpv/scripts/trakt-scrobble
+/mpv/.config/mpv/trakt_config.json
+/mpv/.config/mpv/trakt_history.json
