@@ -45,6 +45,9 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("systemctl --user start ironbar.service")
   hl.exec_cmd("systemctl --user start swaync.service")
   hl.exec_cmd("systemctl --user start hypridle.service")
+  hl.exec_cmd("systemctl --user start hyprpolkitagent.service")
+  hl.exe_cmd("systemctl --user start hyprpaper.service")
+  hl.exec_cmd("clipse --listen")
 end)
 
 
@@ -198,8 +201,9 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(app .. " " .. terminal))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(app .. " " .. browser))
+hl.bind(mainMod .. " + SHIFT + l", hl.dsp.exec_cmd(app .. " " .. "hyprlock"))
 local closeWindowBind = hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
-hl.bind(mainMod .. " + CTRL + R", hl.dsp.exec_cmd("uwsm stop"))
+hl.bind(mainMod .. " + CTRL + E", hl.dsp.exec_cmd("wlogout"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(app .. " " .. fileManager))
 hl.bind(mainMod .. " + SHIFT + Space", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(app .. " " .. menu))
@@ -255,7 +259,9 @@ hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tr
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 
-
+-- Clipboard scratchpad (clipse)
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("pgrep -f '^clipse$' >/dev/null || ghostty --title=clipse -e clipse"))
+hl.bind(mainMod .. " + V", hl.dsp.workspace.toggle_special("clip"))
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----
 --------------------------------
@@ -293,7 +299,20 @@ hl.window_rule({
   float = true,
 })
 
-hl.workspace_rule({workspace = "1", layout = "monocle"})
-hl.workspace_rule({workspace = "4", layout = "monocle"})
-hl.workspace_rule({workspace = "5", layout = "monocle"})
-hl.workspace_rule({workspace = "6", layout = "float"})
+hl.workspace_rule({ workspace = "1", layout = "monocle" })
+hl.workspace_rule({ workspace = "4", layout = "monocle" })
+hl.workspace_rule({ workspace = "5", layout = "monocle" })
+
+hl.window_rule({
+  match = { workspace = 6 },
+  float = true,
+  center = true,
+})
+
+hl.window_rule({
+  name      = "clipse-scratchpad",
+  match     = { title = "clipse" },
+  float     = true,
+  size      = "40% 70%",
+  workspace = "special:clip",
+})
