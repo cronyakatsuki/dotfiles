@@ -46,7 +46,7 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("systemctl --user start swaync.service")
   hl.exec_cmd("systemctl --user start hypridle.service")
   hl.exec_cmd("systemctl --user start hyprpolkitagent.service")
-  hl.exe_cmd("systemctl --user start hyprpaper.service")
+  hl.exec_cmd("systemctl --user start hyprpaper.service")
   hl.exec_cmd("clipse --listen")
 end)
 
@@ -65,8 +65,8 @@ end)
 --   },
 -- })
 
--- hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
--- hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
+hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
+hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
 -- hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
 
@@ -216,6 +216,11 @@ hl.bind(mainMod .. " + SHIFT + k", hl.dsp.layout("swapprev"))
 
 -- Fullscreen focused window
 hl.bind(mainMod .. " + f", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
+
+-- Screenshots (grim + slurp via ~/.config/hypr/scripts/screenshot.sh)
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh region"))
+hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh region-clipboard"))
+hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh full"))
 
 
 -- Switch workspaces with mainMod + [0-9]
