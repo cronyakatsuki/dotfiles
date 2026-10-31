@@ -33,7 +33,7 @@ hl.config({
 local app         = "uwsm app --"
 local terminal    = "ghostty"
 local fileManager = terminal .. " -e yazi"
-local menu        = "hyprlauncher"
+local menu        = "vicinae toggle"
 local browser     = "zen.desktop"
 
 
@@ -42,11 +42,12 @@ local browser     = "zen.desktop"
 -------------------
 
 hl.on("hyprland.start", function()
-  hl.exec_cmd("systemctl --user start ironbar.service")
+  hl.exec_cmd("uwsm app -- quickshell")
   hl.exec_cmd("systemctl --user start swaync.service")
   hl.exec_cmd("systemctl --user start hypridle.service")
   hl.exec_cmd("systemctl --user start hyprpolkitagent.service")
   hl.exec_cmd("systemctl --user start hyprpaper.service")
+  hl.exec_cmd("systemctl --user start vicinae.service")
   hl.exec_cmd("clipse --listen")
 end)
 
@@ -65,8 +66,8 @@ end)
 --   },
 -- })
 
-hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
-hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
+-- hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
+-- hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
 -- hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
 
@@ -145,12 +146,13 @@ hl.config({
 
 hl.config({
   misc = {
-    force_default_wallpaper    = -1,    -- Set to 0 or 1 to disable the anime mascot wallpapers
-    disable_hyprland_logo      = false, -- If true disables the random hyprland logo / anime girl background. :(
+    force_default_wallpaper    = 0,    -- Set to 0 or 1 to disable the anime mascot wallpapers
+    disable_hyprland_logo      = true, -- If true disables the random hyprland logo / anime girl background. :(
     mouse_move_enables_dpms    = true,
     key_press_enables_dpms     = true,
     focus_on_activate          = true,
     allow_session_lock_restore = true,
+    vrr                        = 2,
   },
   cursor = {
     min_refresh_rate = 60,
@@ -174,7 +176,7 @@ hl.config({
     kb_options    = "",
     kb_rules      = "",
 
-    follow_mouse  = 1,
+    follow_mouse  = 0,
 
     sensitivity   = 0, -- -1.0 - 1.0, 0 means no modification.
     accel_profile = "flat",
@@ -203,10 +205,10 @@ hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(app .. " " .. terminal))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(app .. " " .. browser))
 hl.bind(mainMod .. " + SHIFT + l", hl.dsp.exec_cmd(app .. " " .. "hyprlock"))
 local closeWindowBind = hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
-hl.bind(mainMod .. " + CTRL + E", hl.dsp.exec_cmd("wlogout"))
+hl.bind(mainMod .. " + CTRL + E", hl.dsp.exec_cmd(app .. " wlogout"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(app .. " " .. fileManager))
 hl.bind(mainMod .. " + SHIFT + Space", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(app .. " " .. menu))
+-- hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(app .. " " .. menu)) -- Vicinae doesn't need a specific binding with hyprland
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + j", hl.dsp.layout("cyclenext"))
@@ -225,8 +227,8 @@ hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/scr
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
-for i = 1, 10 do
-  local key = i % 10 -- 10 maps to key 0
+for i = 1, 9 do
+  local key = i % 9 -- 10 maps to key 0
   hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
   hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
@@ -247,9 +249,9 @@ hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 -- Laptop multimedia keys for volume and LCD brightness
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%+"),
   { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-"),
   { locked = true, repeating = true })
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),
   { locked = true, repeating = true })
@@ -311,7 +313,45 @@ hl.workspace_rule({ workspace = "5", layout = "monocle" })
 hl.window_rule({
   match = { workspace = 6 },
   float = true,
-  center = true,
+  center = false,
+})
+
+-- Setting up window rules for specific programs to open on specific workspaces
+hl.window_rule({
+  match = { class = "zen" },
+  workspace = "1",
+})
+
+hl.window_rule({
+  match = { class = "eu.betterbird.Betterbird" },
+  workspace = "1",
+})
+
+hl.window_rule({
+  match = { class = "vesktop" },
+  workspace = "4",
+})
+
+hl.window_rule({
+  match = { class = "hayase" },
+  workspace = "5",
+})
+
+hl.window_rule({
+  match = { class = "heroic" },
+  workspace = "6",
+})
+
+hl.window_rule({
+  match = { class = "steam" },
+  workspace = "6",
+})
+
+hl.window_rule({
+  match = { class = "^(osu!)$" },
+  workspace = "6",
+  immediate = true,
+  no_vrr = true,
 })
 
 hl.window_rule({
@@ -319,5 +359,14 @@ hl.window_rule({
   match     = { title = "clipse" },
   float     = true,
   size      = "40% 70%",
+
   workspace = "special:clip",
+})
+
+-- Setup layer rule for vicinae
+hl.layer_rule({
+  match = { namespace = "vicinae" },
+  name = "vicinae-blur",
+  blur = true,
+  ignore_alpha = 0
 })
