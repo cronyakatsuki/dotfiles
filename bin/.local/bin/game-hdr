@@ -19,6 +19,7 @@
 #   --no-hdr           plain gamescope: no --hdr-enabled / DXVK_HDR
 #   --no-mangoapp      no performance overlay
 #   --no-vrr           drop --adaptive-sync
+#   --grab-cursor      force Gamescope relative mouse capture
 #   --lite             no gamescope at all: env + game-performance only
 #   --wd-off           append /WineDetectionEnabled:False (fixes startup deadlock
 #                      in Denuvo/Wine thread-detection on some RE Engine games,
@@ -33,7 +34,7 @@
 
 RES="2560x1440"
 NITS="200"
-ITM=0; SWAPPER=0; SMOOTH=0; HDR=1; MANGO=1; VRR=1; LITE=0; DRY=0; MANGOHUD=0; WDOFF=0; LOWLAT=0; NTSYNC=1
+ITM=0; SWAPPER=0; SMOOTH=0; HDR=1; MANGO=1; VRR=1; GRABCURSOR=0; LITE=0; DRY=0; MANGOHUD=0; WDOFF=0; LOWLAT=0; NTSYNC=1
 DLLOVR=""
 
 while [ $# -gt 0 ]; do
@@ -49,6 +50,7 @@ while [ $# -gt 0 ]; do
 		--no-hdr) HDR=0 ;;
 		--no-mangoapp) MANGO=0 ;;
 		--no-vrr) VRR=0 ;;
+		--grab-cursor) GRABCURSOR=1 ;;
 		--lite) LITE=1 ;;
 		--wd-off|--no-winedetect) WDOFF=1 ;;
 	--no-ntsync) NTSYNC=0 ;;
@@ -137,6 +139,7 @@ if [ "$DRY" -eq 1 ]; then
 		[ "$ITM" -eq 1 ] && GS="$GS --hdr-itm-enabled"
 		[ "$MANGO" -eq 1 ] && GS="$GS --mangoapp"
 		[ "$VRR" -eq 1 ] && GS="$GS --adaptive-sync"
+		[ "$GRABCURSOR" -eq 1 ] && GS="$GS --force-grab-cursor"
 		echo "  LD_PRELOAD=\"\" $GS -- env LD_PRELOAD=\"\$LD_PRELOAD\" $WRAP $WDARG $*"
 	fi
 	exit 0
@@ -166,5 +169,8 @@ if [ "$MANGO" -eq 1 ]; then
 fi
 if [ "$VRR" -eq 1 ]; then
 	GS="$GS --adaptive-sync"
+fi
+if [ "$GRABCURSOR" -eq 1 ]; then
+	GS="$GS --force-grab-cursor"
 fi
 exec sh -c "LD_PRELOAD=\"\" $GS -- env LD_PRELOAD=\"\$LD_PRELOAD\" $WRAP \"\$@\"" game-hdr "$@" $WDARG
