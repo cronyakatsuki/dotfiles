@@ -23,7 +23,7 @@ gtk-single-instance = false
 window-show-tab-bar = never
 
 # ── Remove titlebar & borders for clean minimal look ────────────────
-# window-decoration = none
+window-decoration = none
 
 # ── Don't confirm when closing (tmux handles persistence) ───────────
 confirm-close-surface = false
@@ -79,3 +79,13 @@ resize-overlay = never
 
 # ── Misc ────────────────────────────────────────────────────────────
 mouse-hide-while-typing = true
+
+# ── Background opacity ──────────────────────────────────────────────
+background-opacity = 0.9
+background-blur = true
+
+
+# ── Padding ──────────────────────────────────────────────
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
