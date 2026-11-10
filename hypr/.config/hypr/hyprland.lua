@@ -288,8 +288,24 @@ hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tru
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 
 -- Clipboard scratchpad (clipse)
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("pgrep -f '^clipse$' >/dev/null || ghostty --title=clipse -e clipse"))
-hl.bind(mainMod .. " + V", hl.dsp.workspace.toggle_special("clip"))
+local clipSpawnPending = false
+
+hl.bind(mainMod .. " + V", function()
+  if clipSpawnPending then return end
+  if #hl.get_windows({ title = "clipse" }) > 0 then
+    hl.dispatch(hl.dsp.workspace.toggle_special("clip"))
+  else
+    clipSpawnPending = true
+    hl.exec_cmd("ghostty --title=clipse -e clipse -enable-real-time")
+  end
+end)
+
+hl.on("window.open", function(win)
+  if clipSpawnPending and win and win.title == "clipse" then
+    clipSpawnPending = false
+    hl.dispatch(hl.dsp.workspace.toggle_special("clip"))
+  end
+end)
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----
 --------------------------------
@@ -376,12 +392,13 @@ hl.window_rule({
 })
 
 hl.window_rule({
-  name      = "clipse-scratchpad",
-  match     = { title = "clipse" },
-  float     = true,
-  size      = "40% 70%",
+  name              = "clipse-scratchpad",
+  match             = { title = "clipse" },
+  float             = true,
+  focus_on_activate = true,
+  size              = "60% 90%",
 
-  workspace = "special:clip",
+  workspace         = "special:clip",
 })
 
 -- Setup layer rule for vicinae
