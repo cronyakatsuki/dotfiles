@@ -93,6 +93,36 @@ hl.config({
   },
 })
 
+-- Decorations
+hl.config({
+  decoration = {
+    blur = {
+      enabled = true,
+      size = 15,
+      passes = 3,
+      ignore_opacity = true,
+      noise = 0.5,
+      contrast = 2,
+      brightness = 0.5,
+
+      new_optimizations = true,
+      xray = false,
+    },
+    rounding = 25,
+    rounding_power = 2,
+
+    dim_inactive = true,
+    dim_strength = 0.2,
+
+    shadow = {
+      enabled = true,
+      range = 28,
+      render_power = 3,
+      color = "rgb(11111b)"
+    }
+  }
+})
+
 -- Default curves and animations, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/
 hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
 hl.curve("easeInOutCubic", { type = "bezier", points = { { 0.65, 0.05 }, { 0.36, 1 } } })
