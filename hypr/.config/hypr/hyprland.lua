@@ -43,7 +43,6 @@ local browser     = "zen.desktop"
 
 hl.on("hyprland.start", function()
   hl.exec_cmd("uwsm app -- quickshell")
-  hl.exec_cmd("systemctl --user start swaync.service")
   hl.exec_cmd("systemctl --user start hypridle.service")
   hl.exec_cmd("systemctl --user start hyprpolkitagent.service")
   hl.exec_cmd("systemctl --user start hyprpaper.service")
@@ -80,16 +79,12 @@ hl.config({
   general = {
     gaps_in       = 5,
     gaps_out      = 10,
-
     border_size   = 2,
-
     col           = {
       active_border   = "rgb(f5e0dc)",
       inactive_border = "rgb(313244)",
     },
-
     allow_tearing = true,
-
     layout        = "master",
   },
 
@@ -172,15 +167,9 @@ hl.config({
   input = {
     kb_layout     = "hr",
     kb_variant    = "us",
-    kb_model      = "",
-    kb_options    = "",
-    kb_rules      = "",
-
     follow_mouse  = 0,
-
     sensitivity   = 0, -- -1.0 - 1.0, 0 means no modification.
     accel_profile = "flat",
-
     touchpad      = {
       natural_scroll = false,
     },
