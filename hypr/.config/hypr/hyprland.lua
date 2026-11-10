@@ -224,6 +224,8 @@ hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screensho
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh region-clipboard"))
 hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("$HOME/.config/hypr/scripts/screenshot.sh full"))
 
+-- Notification daemon panel
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs ipc call notifications toggle"))
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
