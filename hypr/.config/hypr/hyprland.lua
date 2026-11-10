@@ -14,9 +14,9 @@ hl.monitor({
   sdr_eotf          = "gamma22",
   sdrbrightness     = 1.0,
   sdrsaturation     = 1.1,
-  sdr_max_luminance = 190,
-  max_avg_luminance = 390,
-  max_luminance     = 390,
+  sdr_max_luminance = 200,
+  max_avg_luminance = 400,
+  max_luminance     = 400,
   sdr_min_luminance = 0,
 })
 
