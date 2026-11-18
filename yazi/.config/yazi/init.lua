@@ -1,5 +1,5 @@
 require("full-border"):setup {
-  type = ui.Border.ROUNDED,
+  set = "rounded"
 }
 require("folder-rules"):setup()
 require("toggle-pane"):entry("min-preview")
