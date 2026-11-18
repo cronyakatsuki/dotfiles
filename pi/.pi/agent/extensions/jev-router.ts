@@ -4,8 +4,9 @@
  * Adapted from /usr/lib/pi/examples/extensions/jev-router.ts to this user's model set:
  *
  * - The Jev classifier (opencode/jev-1.13, fallback opencode/jev-1.13-free) rates the first user
- *   message into one of three tiers matching the previous scene-routing policy:
- *     routine  -> opencode-go/glm-5.3-flash      (plans AND implements, stays put)
+ *   message into one of four tiers:
+ *     trivial  -> opencode-go/glm-5.3-flash      (plans AND implements, stays put)
+ *     routine  -> opencode-go/mimo-v2.6-pro      (plans AND implements, stays put)
  *     hard     -> opencode-go/kimi-k3.1-pro      (plans AND implements, stays put)
  *     frontier -> opencode/gpt-6.1-sol plans, then after the first successful edit/write the
  *                 rest of the turn switches to opencode-go/kimi-k3.1-pro (single cache miss)
@@ -25,7 +26,8 @@ import type { ExtensionAPI, ExtensionContext, ModelRoute, ModelRouteRequest } fr
 const GO = "opencode-go";
 const ZEN = "opencode";
 
-const ROUTINE = "glm-5.3-flash";
+const TRIVIAL = "glm-5.3-flash";
+const ROUTINE = "mimo-v2.6-pro";
 const HARD = "kimi-k3.1-pro";
 const FRONTIER = "gpt-6.1-sol";
 const CHEAP = "glm-5.3-flash";
@@ -33,7 +35,7 @@ const CHEAP = "glm-5.3-flash";
 /** Tools whose successful result means implementation has started. */
 const EDIT_TOOLS = new Set(["edit", "write"]);
 
-type Tier = "routine" | "hard" | "frontier";
+type Tier = "trivial" | "routine" | "hard" | "frontier";
 
 interface JevState {
 	phase: "plan" | "build";
@@ -67,6 +69,7 @@ function editedThisTurn(messages: readonly Message[]): boolean {
 async function chooseTier(request: JevRequest, ctx: ExtensionContext): Promise<Tier> {
 	// Keep a tier model the session already uses, so switching to jev/auto costs no cache miss.
 	const previous = request.previous?.model;
+	if (previous?.id === TRIVIAL) return "trivial";
 	if (previous?.id === ROUTINE) return "routine";
 	if (previous?.id === HARD) return "hard";
 	if (previous?.id === FRONTIER) return "frontier";
@@ -84,7 +87,8 @@ async function chooseTier(request: JevRequest, ctx: ExtensionContext): Promise<T
 					type: "choice",
 					instructions: "How demanding is the software engineering work requested in `prompt`?",
 					criteria: {
-						routine: "Ordinary features, fixes, reviews, edits, or questions",
+						trivial: "Typos, small config or text edits, quick questions, and simple reviews",
+						routine: "Ordinary features and straightforward but non-trivial coding work",
 						hard: "Subtle design, cross-cutting changes, or hard debugging and terminal work",
 						frontier: "High-stakes architecture or genuinely novel/frontier reasoning",
 					},
@@ -96,7 +100,7 @@ async function chooseTier(request: JevRequest, ctx: ExtensionContext): Promise<T
 	const answer = result.stopReason === "stop" ? result.answers.tier : undefined;
 	if (answer?.type !== "choice") return "hard";
 	const probs = answer.probabilities as Partial<Record<Tier, number>>;
-	const ranked = (["frontier", "hard", "routine"] as Tier[])
+	const ranked = (["frontier", "hard", "routine", "trivial"] as Tier[])
 		.map((t) => [t, probs[t] ?? 0] as const)
 		.sort((a, b) => b[1] - a[1]);
 	return ranked[0][1] >= 0.5 ? ranked[0][0] : "hard";
@@ -104,6 +108,7 @@ async function chooseTier(request: JevRequest, ctx: ExtensionContext): Promise<T
 
 /** Initial router state for a tier. */
 function tierState(tier: Tier): JevState {
+	if (tier === "trivial") return { phase: "build", model: TRIVIAL };
 	if (tier === "routine") return { phase: "build", model: ROUTINE };
 	if (tier === "hard") return { phase: "build", model: HARD };
 	return { phase: "plan", model: FRONTIER };
