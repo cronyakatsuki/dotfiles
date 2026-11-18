@@ -1,6 +1,9 @@
 # 00-env.zsh — Environment variables, XDG base dirs, PATH
 # This is sourced first — everything else depends on these paths.
 
+# Set editor to neovim
+export EDITOR=nvim
+
 # ---- XDG Base Directories ----
 : "${XDG_CACHE_HOME:=$HOME/.cache}"
 : "${XDG_DATA_HOME:=$HOME/.local/share}"
