@@ -5,7 +5,7 @@
  *
  * - The Jev classifier (opencode/jev-1.13, fallback opencode/jev-1.13-free) rates the first user
  *   message into one of three tiers matching the previous scene-routing policy:
- *     routine  -> opencode-go/mimo-v2.6-pro      (plans AND implements, stays put)
+ *     routine  -> opencode-go/glm-5.3-flash      (plans AND implements, stays put)
  *     hard     -> opencode-go/kimi-k3.1-pro      (plans AND implements, stays put)
  *     frontier -> opencode/gpt-6.1-sol plans, then after the first successful edit/write the
  *                 rest of the turn switches to opencode-go/kimi-k3.1-pro (single cache miss)
@@ -25,7 +25,7 @@ import type { ExtensionAPI, ExtensionContext, ModelRoute, ModelRouteRequest } fr
 const GO = "opencode-go";
 const ZEN = "opencode";
 
-const ROUTINE = "mimo-v2.6-pro";
+const ROUTINE = "glm-5.3-flash";
 const HARD = "kimi-k3.1-pro";
 const FRONTIER = "gpt-6.1-sol";
 const CHEAP = "glm-5.3-flash";
