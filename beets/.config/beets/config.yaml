@@ -1,0 +1,37 @@
+# beets — library gate for ytmusic-sync (imports happen via `beet import -q`)
+directory: ~/mus
+library: ~/.local/share/beets/library.db
+
+import:
+  move: yes              # move files into ~/mus (no duplicates kept)
+  quiet: yes             # apply best MusicBrainz match without prompting
+  quiet_fallback: asis   # obscure artists not in MusicBrainz -> trust the file's own tags
+  duplicate_action: skip # same album/track already in library -> skip file
+  timid: no
+
+plugins: fetchart replaygain chroma musicbrainz
+
+# acoustic fingerprint matching (AcoustID) - matches by sound, rescues garbage tags
+chroma:
+  auto: yes
+
+fetchart:
+  auto: yes
+  cautious: true
+  cover_format: JPEG
+
+match:
+  # yt-dlp fallback files carry CV-credit artist strings that inflate distance
+  # even on fingerprint-verified matches; 0.5 lets AcoustID-confirmed candidates
+  # apply in quiet mode. Tag-clean soulseek rips match well below this anyway.
+  strong_rec_thresh: 0.5
+  preferred:
+    countries: [JP, US]  # shikairo and friends: favor Japanese releases
+
+replaygain:
+  backend: ffmpeg
+
+paths:
+  default: $albumartist/$album%aunique{}/$track $title
+  singleton: $artist/$title
+  comp: $artist/$album%aunique{}/$track $title
