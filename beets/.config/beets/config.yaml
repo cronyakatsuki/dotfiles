@@ -35,3 +35,4 @@ paths:
   default: $albumartist/$album%aunique{}/$track $title
   singleton: $artist/$title
   comp: $artist/$album%aunique{}/$track $title
+  'albumartist::^Various|^Razni': $artist/$album%aunique{}/$track $title
