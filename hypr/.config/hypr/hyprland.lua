@@ -309,6 +309,29 @@ hl.on("window.open", function(win)
     end
   end
 end)
+
+-- NetworkManager scratchpad (nmtui)
+local netSpawnPending = false
+
+hl.bind(mainMod .. " + SHIFT + N", function()
+  if netSpawnPending then return end
+  if #hl.get_windows({ title = "nmtui" }) > 0 then
+    hl.dispatch(hl.dsp.workspace.toggle_special("net"))
+  else
+    netSpawnPending = true
+    hl.exec_cmd("ghostty --title=nmtui -e nmtui")
+  end
+end)
+
+hl.on("window.open", function(win)
+  if netSpawnPending and win and win.title == "nmtui" then
+    netSpawnPending = false
+    local activeSpecial = hl.get_active_special_workspace()
+    if not activeSpecial or activeSpecial.name ~= "special:net" then
+      hl.dispatch(hl.dsp.workspace.toggle_special("net"))
+    end
+  end
+end)
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----
 --------------------------------
@@ -402,6 +425,16 @@ hl.window_rule({
   size              = "60% 90%",
 
   workspace         = "special:clip",
+})
+
+hl.window_rule({
+  name              = "nmtui-scratchpad",
+  match             = { title = "nmtui" },
+  float             = true,
+  focus_on_activate = true,
+  size              = "60% 90%",
+
+  workspace         = "special:net",
 })
 
 -- Setup layer rule for vicinae
