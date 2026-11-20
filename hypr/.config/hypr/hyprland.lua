@@ -303,7 +303,10 @@ end)
 hl.on("window.open", function(win)
   if clipSpawnPending and win and win.title == "clipse" then
     clipSpawnPending = false
-    hl.dispatch(hl.dsp.workspace.toggle_special("clip"))
+    local activeSpecial = hl.get_active_special_workspace()
+    if not activeSpecial or activeSpecial.name ~= "special:clip" then
+      hl.dispatch(hl.dsp.workspace.toggle_special("clip"))
+    end
   end
 end)
 --------------------------------
