@@ -6,7 +6,7 @@ import:
   move: yes              # move files into ~/mus (no duplicates kept)
   quiet: yes             # apply best MusicBrainz match without prompting
   quiet_fallback: asis   # obscure artists not in MusicBrainz -> trust the file's own tags
-  duplicate_action: skip # same album/track already in library -> skip file
+  duplicate_action: merge # complete partial albums instead of skipping them
   timid: no
 
 plugins: fetchart replaygain chroma musicbrainz
