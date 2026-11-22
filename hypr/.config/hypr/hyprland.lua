@@ -310,6 +310,52 @@ hl.on("window.open", function(win)
   end
 end)
 
+-- Bluetooth scratchpad (bluetuith)
+local btSpawnPending = false
+
+hl.bind(mainMod .. " + SHIFT + B", function()
+  if btSpawnPending then return end
+  if #hl.get_windows({ title = "bluetuith" }) > 0 then
+    hl.dispatch(hl.dsp.workspace.toggle_special("bt"))
+  else
+    btSpawnPending = true
+    hl.exec_cmd("ghostty --title=bluetuith -e bluetuith")
+  end
+end)
+
+hl.on("window.open", function(win)
+  if btSpawnPending and win and win.title == "bluetuith" then
+    btSpawnPending = false
+    local activeSpecial = hl.get_active_special_workspace()
+    if not activeSpecial or activeSpecial.name ~= "special:bt" then
+      hl.dispatch(hl.dsp.workspace.toggle_special("bt"))
+    end
+  end
+end)
+
+-- Audio mixer scratchpad (wiremix)
+local mixerSpawnPending = false
+
+hl.bind(mainMod .. " + SHIFT + M", function()
+  if mixerSpawnPending then return end
+  if #hl.get_windows({ title = "wiremix" }) > 0 then
+    hl.dispatch(hl.dsp.workspace.toggle_special("mix"))
+  else
+    mixerSpawnPending = true
+    hl.exec_cmd("ghostty --title=wiremix -e wiremix")
+  end
+end)
+
+hl.on("window.open", function(win)
+  if mixerSpawnPending and win and win.title == "wiremix" then
+    mixerSpawnPending = false
+    local activeSpecial = hl.get_active_special_workspace()
+    if not activeSpecial or activeSpecial.name ~= "special:mix" then
+      hl.dispatch(hl.dsp.workspace.toggle_special("mix"))
+    end
+  end
+end)
+
 -- NetworkManager scratchpad (nmtui)
 local netSpawnPending = false
 
@@ -425,6 +471,26 @@ hl.window_rule({
   size              = "60% 90%",
 
   workspace         = "special:clip",
+})
+
+hl.window_rule({
+  name              = "bluetuith-scratchpad",
+  match             = { title = "bluetuith" },
+  float             = true,
+  focus_on_activate = true,
+  size              = "60% 90%",
+
+  workspace         = "special:bt",
+})
+
+hl.window_rule({
+  name              = "wiremix-scratchpad",
+  match             = { title = "wiremix" },
+  float             = true,
+  focus_on_activate = true,
+  size              = "60% 90%",
+
+  workspace         = "special:mix",
 })
 
 hl.window_rule({
