@@ -1,0 +1,11 @@
+[Unit]
+Description=slskd - Soulseek client/server (user)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/slskd
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
