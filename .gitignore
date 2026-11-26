@@ -60,3 +60,4 @@ opentabletdriver/.config/OpenTabletDriver/Logs/
 /pi/.pi/agent/extensions/package.json
 /pi/.pi/agent/extensions/package-lock.json
 /htop/.config/htop/htop_history
+/beets/.config/beets/library.db
