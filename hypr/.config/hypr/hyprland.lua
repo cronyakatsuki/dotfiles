@@ -43,32 +43,12 @@ local browser     = "zen.desktop"
 
 hl.on("hyprland.start", function()
   hl.exec_cmd("uwsm app -- quickshell")
-  hl.exec_cmd("systemctl --user start hypridle.service")
+  hl.exec_cmd("systemctl --user start stasis.service")
   hl.exec_cmd("systemctl --user start hyprpolkitagent.service")
-  hl.exec_cmd("systemctl --user start hyprpaper.service")
+  hl.exec_cmd(app .. "wbg ~/pic/Wallpapers/luffy.png")
   hl.exec_cmd("systemctl --user start vicinae.service")
   hl.exec_cmd("clipse --listen")
 end)
-
-
------------------------
------ PERMISSIONS -----
------------------------
-
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Permissions/
--- Please note permission changes here require a Hyprland restart and are not applied on-the-fly
--- for security reasons
-
--- hl.config({
---   ecosystem = {
---     enforce_permissions = true,
---   },
--- })
-
--- hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
--- hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
--- hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
-
 
 -----------------------
 ---- LOOK AND FEEL ----
@@ -222,7 +202,7 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(app .. " " .. terminal))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(app .. " " .. browser))
-hl.bind(mainMod .. " + SHIFT + l", hl.dsp.exec_cmd(app .. " " .. "hyprlock"))
+hl.bind(mainMod .. " + SHIFT + l", hl.dsp.exec_cmd(app .. " " .. "waylock"))
 local closeWindowBind = hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + CTRL + E", hl.dsp.exec_cmd(app .. " wlogout"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(app .. " " .. fileManager))
